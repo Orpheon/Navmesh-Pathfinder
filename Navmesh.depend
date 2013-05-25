@@ -1,0 +1,20 @@
+# depslib dependency file v1.0
+1364762490 source:c:\users\orpheon\programming\gmk\extensions\navmesh\main.cpp
+	"main.h"
+	"load_map.c"
+	<stdio.h>
+
+1198436942 c:\users\orpheon\programming\gmk\extensions\navmesh\main.h
+	<windows.h>
+
+1364887155 c:\users\orpheon\programming\gmk\extensions\navmesh\load_map.c
+	"load_map.h"
+	"png.h"
+	"string.h"
+	<stdio.h>
+
+1364740605 c:\users\orpheon\programming\gmk\extensions\navmesh\load_map.h
+	"data_types.h"
+
+1364834501 c:\users\orpheon\programming\gmk\extensions\navmesh\data_types.h
+
