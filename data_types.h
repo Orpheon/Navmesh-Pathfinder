@@ -1,25 +1,39 @@
 #ifndef DATA_TYPES_H_INCLUDED
 #define DATA_TYPES_H_INCLUDED
 
-typedef struct
+struct Bitmask
 {
     int width;
     int height;
     bool **mask;
-} Bitmask;
+};
 
-typedef struct
+struct Point
 {
-    double x;
-    double y;
-    double width;
-    double height;
-} Rect;
+    int x;
+    int y;
+};
 
-typedef struct
+struct Rect
+{
+    Point topleft;
+    Point topright;
+    Point bottomleft;
+    Point bottomright;
+    Rect *connections;
+    int num_connections;
+};
+
+struct RectLinkedList
+{
+    RectLinkedList *next;
+    Rect *rect;
+};
+
+struct Navmesh
 {
     int num_rects;
-    Rect *list;
-} Navmesh;
+    RectLinkedList *list;
+};
 
 #endif // DATA_TYPES_H_INCLUDED

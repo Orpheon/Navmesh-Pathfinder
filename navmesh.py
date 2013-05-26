@@ -16,16 +16,13 @@ class Navmesh(object):
         #self.generate_navmesh(width, height, speed)
         #self.save_navmesh()
         self.mesh = []
-        self.load_navmesh(self.wallmask.name+".navmesh")
+        #self.load_navmesh(self.wallmask.name+".navmesh")
         self.draw_navmesh()
         print("---DONE---")
 
     def generate_navmesh(self, char_width, char_height, char_speed):
         mask = self.wallmask.mask
         self.mesh = []
-        
-        # TODO: Make sure areas aren't generated wayyy out of the map
-        # "Navmesh collision: 47212.55 <= 539.6 <= 47242.55"
     
         # Generate all areas
         print("---GENERATING AREAS---")
@@ -201,6 +198,10 @@ class Navmesh(object):
         r.bottomright.set_coord(x+width, y)
         r.topleft.set_coord(x, y-height)
         r.topright.set_coord(x+width, y-height)
+        print("\nNew rect:")
+        print(r.topleft.get_coord())
+        print(r.bottomright.get_coord())
+        raw_input()
         return r
     
     def connect_rects_mutually(self, rect1, rect2):
@@ -239,17 +240,17 @@ class Navmesh(object):
     
     def save_navmesh(self):
         print("---EXPORTING NAVMESH---")
-        data = struct.pack(">H", len(self.mesh))
+        data = struct.pack("<H", len(self.mesh))
         for rect in self.mesh:
-            data += struct.pack(">HH", rect.topleft.get_coord()[0], rect.topleft.get_coord()[1])
-            data += struct.pack(">HH", rect.bottomleft.get_coord()[0], rect.bottomleft.get_coord()[1])
-            data += struct.pack(">HH", rect.topright.get_coord()[0], rect.topright.get_coord()[1])
-            data += struct.pack(">HH", rect.bottomright.get_coord()[0], rect.bottomright.get_coord()[1])
+            data += struct.pack("<II", rect.topleft.get_coord()[0], rect.topleft.get_coord()[1])
+            data += struct.pack("<II", rect.bottomleft.get_coord()[0], rect.bottomleft.get_coord()[1])
+            data += struct.pack("<II", rect.topright.get_coord()[0], rect.topright.get_coord()[1])
+            data += struct.pack("<II", rect.bottomright.get_coord()[0], rect.bottomright.get_coord()[1])
         
         for rect in self.mesh:
-            data += struct.pack(">B", len(rect.connections))
+            data += struct.pack("<B", len(rect.connections))
             for r in rect.connections:
-                data += struct.pack(">H", self.mesh.index(r))
+                data += struct.pack("<H", self.mesh.index(r))
         
         f = open(self.wallmask.name+".navmesh", "wb")
         f.write(data)
@@ -259,36 +260,36 @@ class Navmesh(object):
         print("---LOADING NAVMESH---")
         f = open(fname, "rb")
         data = f.read()
-        size = struct.unpack_from(">H", data)[0]
-        data = data[2:]
+        size = struct.unpack_from("<I", data)[0]
+        data = data[4:]
         self.mesh = []
         # Positions
         for i in range(size):
             p = Polygon()
             
             
-            x, y = struct.unpack_from(">HH", data)
+            x, y = struct.unpack_from("<II", data)
             p.topleft.set_coord(x, y)
-            data = data[4:]
-            x, y = struct.unpack_from(">HH", data)
+            data = data[8:]
+            x, y = struct.unpack_from("<II", data)
             p.bottomleft.set_coord(x, y)
-            data = data[4:]
-            x, y = struct.unpack_from(">HH", data)
+            data = data[8:]
+            x, y = struct.unpack_from("<II", data)
             p.topright.set_coord(x, y)
-            data = data[4:]
-            x, y = struct.unpack_from(">HH", data)
+            data = data[8:]
+            x, y = struct.unpack_from("<II", data)
             p.bottomright.set_coord(x, y)
-            data = data[4:]
+            data = data[8:]
             
             self.mesh.append(p)
         
-        for rect in self.mesh:
+        '''for rect in self.mesh:
             # Connections
-            n_connections = struct.unpack_from(">B", data)[0]
+            n_connections = struct.unpack_from("<I", data)[0]
             data = data[1:]
             for j in range(n_connections):
-                rect.connections.append(self.mesh[struct.unpack_from(">H", data)[0]])
-                data = data[2:]
+                rect.connections.append(self.mesh[struct.unpack_from("<I", data)[0]])
+                data = data[2:]'''
 
         
 

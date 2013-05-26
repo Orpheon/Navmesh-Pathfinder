@@ -2,6 +2,7 @@
 #include "png.h"
 #include "string.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 Bitmask* load_from_file(char *filename)
 {
@@ -80,6 +81,10 @@ Bitmask* load_from_file(char *filename)
 
     // First uncompress the data
 
+    // Lets scale the map here too, to not have to redo everything later
+    map->width *= 6;
+    map->height *= 6;
+
     // Make the actual 2d array
     map->mask = (bool**) calloc(map->width, sizeof(bool*));
     for (int i=0; i<map->width; i++)
@@ -93,14 +98,14 @@ Bitmask* load_from_file(char *filename)
     int value = ((int) index[0]) - 32;
 
     // Since it's unlikely that the size of the map is mod 6 == 0, first take out the starting bits from the first byte
-    for (int i=0; i<(end_position-start_position)*6 - (map->width*map->height); i++)
+    for (int i=0; i<(end_position-start_position)*6 - ((map->width/6)*(map->height/6)); i++)
     {
         bitmask *= 2;
     }
 
-    for (int j=map->height-1; j>=0; j--)
+    for (int j=map->height-6; j>=0; j-=6)
     {
-        for (int i=map->width-1; i>=0; i--)
+        for (int i=map->width-6; i>=0; i-=6)
         {
             if (bitmask == 64)
             {
@@ -112,7 +117,13 @@ Bitmask* load_from_file(char *filename)
             if (value & bitmask)
             {
                 // This part is solid
-                map->mask[i][j] = true;
+                for (int k=0; k<6; k++)
+                {
+                    for (int l=0; l<6; l++)
+                    {
+                        map->mask[i+k][j+l] = true;
+                    }
+                }
             }
             bitmask *= 2;
         }
