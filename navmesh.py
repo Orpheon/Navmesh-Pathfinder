@@ -16,7 +16,7 @@ class Navmesh(object):
         #self.generate_navmesh(width, height, speed)
         #self.save_navmesh()
         self.mesh = []
-        #self.load_navmesh(self.wallmask.name+".navmesh")
+        self.load_navmesh(self.wallmask.name+".navmesh")
         self.draw_navmesh()
         print("---DONE---")
 
@@ -121,9 +121,9 @@ class Navmesh(object):
                     # Stair going left and down
                     while next_rect != None:
                         # Check whether the stair continues
-                        if next_rect.bottomright.get_coord()[0] - next_rect.bottomleft.get_coord()[0] + 1 != stair_width:
+                        if next_rect.bottomright.x - next_rect.bottomleft.x + 1 != stair_width:
                             break
-                        if rect.topleft.get_coord()[1] - rect.bottomleft.get_coord()[1] != next_rect.topright.get_coord()[1] - next_rect.bottomright.get_coord()[1]:
+                        if rect.topleft.y - rect.bottomleft.y != next_rect.topright.y - next_rect.bottomright.y:
                             break
                         
                         # As long as steps are where they should
