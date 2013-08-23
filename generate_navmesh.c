@@ -1,9 +1,12 @@
 #include "generate_navmesh.h"
 #include "data_types.h"
+#include "navmesh.h"
+#include <stdio.h>
 
 #define JUMP_HEIGHT 70
 #define STAIR_HEIGHT 6
 #define MAX_STAIR_WIDTH 11*6
+#define sign(x) ((x>0) - (x<0))
 
 Navmesh* generate_navmesh(Bitmask *map, int char_width, int char_height, double char_speed)
 {
@@ -11,7 +14,7 @@ Navmesh* generate_navmesh(Bitmask *map, int char_width, int char_height, double 
     Rect *rect;
     RectLinkedList *list_iterator;
 
-    printf("---GENERATING AREAS---");
+    printf("\n---GENERATING AREAS---\n");
 
     // Generate all the areas, including unnecessary ones
     int x, y, i, j, max_height;
@@ -105,7 +108,7 @@ Navmesh* generate_navmesh(Bitmask *map, int char_width, int char_height, double 
 
     // Lower them by a set amount, removing all those that are too low
     list_iterator = mesh->list;
-    while (list_iterator != NULL)
+    while (list_iterator != 0)
     {
         rect = list_iterator->rect;
         rect->topleft.y += char_height;
@@ -119,156 +122,137 @@ Navmesh* generate_navmesh(Bitmask *map, int char_width, int char_height, double 
         list_iterator = list_iterator->next;
     }
 
-    // Stair optimisations
-    // Remove and simplify all rects that are clearly steps of linear stairs
-    printf("\n---OPTIMIZING STAIRS---");
+//    // Stair optimisations
+//    // Remove and simplify all rects that are clearly steps of linear stairs
+//    printf("\n---OPTIMIZING STAIRS---\n");
+//    list_iterator = mesh->list;
+//    i = 0;
+//    while (list_iterator != 0)
+//    {
+//        rect = list_iterator->rect;
+//        // The rectangle would only be part of a stair if its width is the width of every step
+//        int stair_width = rect->bottomright.x - rect->bottomleft.x + 1;
+//        if (stair_width >= 1 && stair_width <= MAX_STAIR_WIDTH)
+//        {
+//            Rect *next_rect = find_rect(mesh, rect->bottomleft.x-stair_width, rect->bottomleft.y+STAIR_HEIGHT);
+//            if (next_rect != 0)
+//            {
+//                // Stair is going left and down
+//                while (next_rect != 0)
+//                {
+//                    // Check whether the stair continues
+//                    if (next_rect->bottomright.x - next_rect->bottomleft.x + 1 != stair_width)
+//                    {
+//                        break;
+//                    }
+//                    if (rect->topleft.y - rect->bottomleft.y != next_rect->topright.y - next_rect->bottomright.y)
+//                    {
+//                        break;
+//                    }
+//
+//                    // As long as steps are where they should, merge them in the original one
+//                    rect->bottomleft.x = next_rect->bottomleft.x;
+//                    rect->bottomleft.y = next_rect->bottomleft.y;
+//                    rect->topleft.x = next_rect->topleft.x;
+//                    rect->topleft.y = next_rect->topleft.y;
+//                    remove_from_navmesh(mesh, next_rect);
+//                    next_rect = find_rect(mesh, rect->bottomleft.x-stair_width, rect->bottomleft.y+STAIR_HEIGHT);
+//                }
+//            }
+//            else
+//            {
+//                // Same as above, only this time for stairs that go right and down
+//                x = rect->bottomleft.x;
+//                y = rect->bottomleft.y;
+//                next_rect = find_rect(mesh, x+stair_width, y+STAIR_HEIGHT);
+//                while (next_rect != 0)
+//                {
+//                    // Check whether the stair continues
+//                    if (next_rect->bottomright.x - next_rect->bottomleft.x + 1 != stair_width)
+//                    {
+//                        break;
+//                    }
+//                    if (rect->topright.y - rect->bottomright.y != next_rect->topleft.y - next_rect->bottomleft.y)
+//                    {
+//                        break;
+//                    }
+//
+//                    rect->bottomright.x = next_rect->bottomright.x;
+//                    rect->bottomright.y = next_rect->bottomright.y;
+//                    rect->topright.x = next_rect->topright.x;
+//                    rect->topright.y = next_rect->topright.y;
+//                    remove_from_navmesh(mesh, next_rect);
+//                    x += stair_width;
+//                    y += STAIR_HEIGHT;
+//                    next_rect = find_rect(mesh, x+stair_width, y+STAIR_HEIGHT);
+//                }
+//            }
+//        }
+//
+//        list_iterator = list_iterator->next;
+//    }
+
+    // Connect any areas that touch each other
+    printf("\n---CONNECTING NEIGHBOURING AREAS---\n");
     list_iterator = mesh->list;
-    i = 0;
-    while (list_iterator != NULL)
+    RectLinkedList *other_list_iterator = mesh->list;
+    Rect *other_rect;
+    int sign1, sign2;
+    bool cont = false;
+    while (list_iterator != 0)
     {
         rect = list_iterator->rect;
-        // The rectangle would only be part of a stair if its width is the width of every step
-        int stair_width = rect->bottomright.x - rect->bottomleft.x + 1;
-        if (stair_width >= 1 && stair_width <= MAX_STAIR_WIDTH)
+        other_list_iterator = mesh->list;
+        while (other_list_iterator != 0)
         {
-            Rect *next_rect = find_rect(mesh, rect->bottomleft.x-stair_width, rect->bottomleft.y+STAIR_HEIGHT);
-            if (next_rect != NULL)
+            other_rect = other_list_iterator->rect;
+            // If it's the same rect, no need to even consider connections
+            if (rect != other_rect)
             {
-                // Stair is going left and down
-                while (next_rect != NULL)
+                // If it's already connected, ditto
+                cont = false;
+                for (i=0; i<rect->num_connections; i++)
                 {
-                    // Check whether the stair continues
-                    if (next_rect->bottomright.x - next_rect->bottomleft.x + 1 != stair_width)
+                    if (rect->connections[i] == other_rect)
                     {
+                        cont = true;
                         break;
                     }
-                    if (rect->topleft.y - rect->bottomleft.y != next_rect->topright.y - next_rect->bottomright.y)
-                    {
-                        break;
-                    }
-
-                    // As long as steps are where they should, merge them in the original one
-                    rect->bottomleft.x = next_rect->bottomleft.x;
-                    rect->bottomleft.y = next_rect->bottomleft.y;
-                    rect->topleft.x = next_rect->topleft.x;
-                    rect->topleft.y = next_rect->topleft.y;
-                    remove_from_navmesh(mesh, next_rect);
-                    next_rect = find_rect(mesh, rect->bottomleft.x-stair_width, rect->bottomleft.y+STAIR_HEIGHT);
                 }
-            }
-            else
-            {
-                // Same as above, only this time for stairs that go right and down
-                x = rect->bottomleft.x;
-                y = rect->bottomleft.y;
-                next_rect = find_rect(mesh, x+stair_width, y+STAIR_HEIGHT);
-                while (next_rect != NULL)
+                if (!cont)
                 {
-                    // Check whether the stair continues
-                    if (next_rect->bottomright.x - next_rect->bottomleft.x + 1 != stair_width)
+                    // If other_rect is to the immediate left of rect
+                    if (other_rect->bottomright.x == rect->bottomleft.x - 1)
                     {
-                        break;
-                    }
-                    if (rect->topright.y - rect->bottomright.y != next_rect->topleft.y - next_rect->bottomleft.y)
-                    {
-                        break;
-                    }
+                        // Check whether the y's connect, which means that the lines from topleft<->bottomright & topright<->bottomleft cross within the rects, ie. they have the same slope signs
+                        sign1 = sign(rect->topleft.y - other_rect->bottomright.y);
+                        sign2 = sign(other_rect->topright.y - rect->bottomleft.y);
 
-                    rect->bottomright.x = next_rect->bottomright.x;
-                    rect->bottomright.y = next_rect->bottomright.y;
-                    rect->topright.x = next_rect->topright.x;
-                    rect->topright.y = next_rect->topright.y;
-                    remove_from_navmesh(mesh, next_rect);
-                    x += stair_width;
-                    y += STAIR_HEIGHT;
-                    next_rect = find_rect(mesh, x+stair_width, y+STAIR_HEIGHT);
+                        if (sign1 == sign2 || sign1 == 0 || sign2 == 0)
+                        {
+                            connect_rect(rect, other_rect);
+                            connect_rect(other_rect, rect);
+                        }
+                    }
                 }
+
             }
+            other_list_iterator = other_list_iterator->next;
         }
+        list_iterator = list_iterator->next;
+    }
 
+    printf("\n---SIMULATING PLAYER MOVEMENT---\n");
+    int counter = 0;
+    list_iterator = mesh->list;
+    while (list_iterator != 0)
+    {
+        printf("\n%i%s", (int)(counter++*100.0/mesh->num_rects), "%");
+        fflush(stdout);
+        rect = list_iterator->rect;
+        test_rectangle(mesh, rect, map, char_width, char_height, char_speed);
         list_iterator = list_iterator->next;
     }
 
     return mesh;
-}
-
-void add_to_navmesh(Navmesh* mesh, int bottomleft_x, int bottomleft_y, int width, int height)
-{
-    Rect *r = (Rect*) calloc(1, sizeof(Rect));
-
-//    printf("\n\nPosition: (%i | %i), (%i | %i)", bottomleft_x, bottomleft_y, bottomleft_x+width, bottomleft_y+height);
-
-    // Positions
-    r->topleft.x = bottomleft_x;
-    r->topleft.y = bottomleft_y-height;
-    r->bottomleft.x = bottomleft_x;
-    r->bottomleft.y = bottomleft_y;
-    r->topright.x = bottomleft_x + width;
-    r->topright.y = bottomleft_y - height;
-    r->bottomright.x = bottomleft_x + width;
-    r->bottomright.y = bottomleft_y;
-
-    // Add it to the list
-    RectLinkedList *link = (RectLinkedList*) calloc(1, sizeof(RectLinkedList));
-    link->rect = r;
-    link->next = NULL;
-
-    RectLinkedList *tmp = mesh->list;
-    if (tmp == NULL)
-    {
-        mesh->list = link;
-    }
-    else
-    {
-        while (tmp->next != NULL)
-        {
-            tmp = tmp->next;
-        }
-        tmp->next = link;
-    }
-
-    mesh->num_rects++;
-}
-
-Rect* find_rect(Navmesh *mesh, double x, double y)
-{
-    // Returns a rect if there's one with the bottomleft corner at that position, NULL if there isn't
-    RectLinkedList *l = mesh->list;
-    Rect *r;
-
-    while (l != NULL)
-    {
-        r = l->rect;
-        if (r->bottomleft.x == x && r->bottomleft.y == y)
-        {
-            return r;
-        }
-        l = l->next;
-    }
-    return NULL;
-}
-
-void remove_from_navmesh(Navmesh *mesh, Rect *rect)
-{
-    RectLinkedList *l = mesh->list;
-    if (l->rect == rect)
-    {
-        mesh->list = l->next;
-        mesh->num_rects--;
-        free(rect);
-        free(l);
-    }
-    while (l->next != NULL)
-    {
-        if (l->next->rect == rect)
-        {
-            RectLinkedList *tmp;
-            tmp = l->next->next;
-            free(rect);
-            free(l->next);
-            l->next = tmp;
-            mesh->num_rects--;
-        }
-        l = l->next;
-    }
 }

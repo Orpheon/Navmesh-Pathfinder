@@ -27,23 +27,22 @@ void export_navmesh(Navmesh *mesh, char* name)
         l = l->next;
     }
 
-//    int a[mesh->num_rects];
-//    for (int i=0; i<mesh->num_rects; i++)
-//    {
-//        a[i] = 0;
-//    }
-//    fwrite((const void*) a, sizeof(int), mesh->num_rects, f);
-    fclose(f);
-    /*l = mesh->list;
+    printf("\n\nFRESH START\n\n");
+
+    l = mesh->list;
+    int tmp;
     for (int i=0; i<mesh->num_rects; i++)
     {
         r = l->rect;
         fwrite(&(r->num_connections), sizeof(int), 1, f);
         for (int j=0; j<r->num_connections; j++)
         {
-            fwrite(find_index(mesh, r->connections[j]), sizeof(int), 1, f);
+            tmp = find_index(mesh, r->connections[j]);
+            fwrite((const void*) &tmp, sizeof(int), 1, f);
         }
-    }*/
+        l = l->next;
+    }
+    fclose(f);
 }
 
 int find_index(Navmesh *mesh, Rect *rect)
@@ -51,11 +50,7 @@ int find_index(Navmesh *mesh, Rect *rect)
     int i = 0;
     RectLinkedList *l;
     l = mesh->list;
-    if (l == 0)
-    {
-        return -1;
-    }
-    while (l->next != 0)
+    while (l != NULL)
     {
         if (l->rect == rect)
         {

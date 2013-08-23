@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+const char GG2_TEXT_CHUNK_KEYWORD[] = "Gang Garrison 2 Level Data";
+
 Bitmask* load_from_file(char *filename)
 {
     // Stole almost everything from cspotcode GG2DLL: https://github.com/cspotcode/Garrison-Builder/blob/master/GG2DLL/GG2DLL/GG2DLL.cpp

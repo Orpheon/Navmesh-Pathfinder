@@ -15,7 +15,7 @@ class Navmesh(object):
         speed = 2
         #self.generate_navmesh(width, height, speed)
         #self.save_navmesh()
-        self.mesh = []
+        #self.mesh = []
         self.load_navmesh(self.wallmask.name+".navmesh")
         self.draw_navmesh()
         print("---DONE---")
@@ -111,7 +111,7 @@ class Navmesh(object):
             # Go through all rectangles, but skip over those that were deleted (hence while and not for)
             rect = self.mesh[i]
             # The rectangle would only be a stair if it's width is the width of one step
-            stair_width = rect.bottomright.get_coord()[0] - rect.bottomleft.get_coord()[0] + 1
+            stair_width = rect.bottomright.x - rect.bottomleft.x + 1
             if stair_width in range(1, self.MAX_STAIR_WIDTH):
                 # If it's small enough that it can be called a stair
                 x, y = rect.bottomleft.get_coord()
@@ -140,9 +140,9 @@ class Navmesh(object):
                     next_rect = self.find_rect(x+stair_width, y+self.STAIR_HEIGHT)
                     while next_rect != None:
                         # Check whether the stair continues
-                        if next_rect.bottomright.get_coord()[0] - next_rect.bottomleft.get_coord()[0] + 1 != stair_width:
+                        if next_rect.bottomright.x - next_rect.bottomleft.x + 1 != stair_width:
                             break
-                        if rect.topright.get_coord()[1] - rect.bottomright.get_coord()[1] != next_rect.topleft.get_coord()[1] - next_rect.bottomleft.get_coord()[1]:
+                        if rect.topright.y - rect.bottomright.y != next_rect.topleft.y - next_rect.bottomleft.y:
                             break
                         rect.bottomright = next_rect.bottomright
                         rect.topright = next_rect.topright
@@ -160,18 +160,18 @@ class Navmesh(object):
                 if other_rect == rect or other_rect in rect.connections:
                     # No need to compute any kind of connection
                     continue
-                if other_rect.bottomright.get_coord()[0] == rect.bottomleft.get_coord()[0] - 1:
+                if other_rect.bottomright.x == rect.bottomleft.x - 1:
                     # other_rect is left of the current rect
                     # Check if the y's connect, which means that the lines from topleft<->bottomright & topright<->bottomleft cross, ie. they have the same slope signs
-                    sign1 = sign(rect.topleft.get_coord()[1] - other_rect.bottomright.get_coord()[1])
-                    sign2 = sign(other_rect.topright.get_coord()[1] - rect.bottomleft.get_coord()[1])
+                    sign1 = sign(rect.topleft.y - other_rect.bottomright.y)
+                    sign2 = sign(other_rect.topright.y - rect.bottomleft.y)
                     if sign1 == sign2 or sign1 == 0 or sign2 == 0:
                         self.connect_rects_mutually(rect, other_rect)
-                elif other_rect.bottomleft.get_coord()[0] == rect.bottomright.get_coord()[0] + 1:
+                elif other_rect.bottomleft.x == rect.bottomright.x + 1:
                     # other_rect is right of the current rect
                     # Check if the y's connect, which means that the lines from topleft<->bottomright & topright<->bottomleft cross, ie. they have the same slope signs
-                    sign1 = sign(other_rect.topleft.get_coord()[1] - rect.bottomright.get_coord()[1])
-                    sign2 = sign(rect.topright.get_coord()[1] - other_rect.bottomleft.get_coord()[1])
+                    sign1 = sign(other_rect.topleft.y - rect.bottomright.y)
+                    sign2 = sign(rect.topright.y - other_rect.bottomleft.y)
                     if sign1 == sign2 or sign1 == 0 or sign2 == 0:
                         self.connect_rects_mutually(rect, other_rect)
 
@@ -198,10 +198,10 @@ class Navmesh(object):
         r.bottomright.set_coord(x+width, y)
         r.topleft.set_coord(x, y-height)
         r.topright.set_coord(x+width, y-height)
-        print("\nNew rect:")
-        print(r.topleft.get_coord())
-        print(r.bottomright.get_coord())
-        raw_input()
+        #print("\nNew rect:")
+        #print(r.topleft.get_coord())
+        #print(r.bottomright.get_coord())
+        #raw_input()
         return r
     
     def connect_rects_mutually(self, rect1, rect2):
@@ -229,8 +229,8 @@ class Navmesh(object):
             draw.line([rect.bottomleft.get_coord(), rect.topleft.get_coord()], (0, 212, 255), width=1)
             draw.line([rect.bottomright.get_coord(), rect.topright.get_coord()], (0, 212, 255), width=1)
             for r in rect.connections:
-                pos1 = (int(rect.bottomright.get_coord()[0]/2 + rect.bottomleft.get_coord()[0]/2), int(rect.bottomright.get_coord()[1]/2 + rect.topleft.get_coord()[1]/2))
-                pos2 = (int(r.bottomright.get_coord()[0]/2 + r.bottomleft.get_coord()[0]/2), int(r.bottomright.get_coord()[1]/2 + r.topleft.get_coord()[1]/2))
+                pos1 = (int(rect.bottomright.x/2 + rect.bottomleft.x/2), int(rect.bottomright.y/2 + rect.topleft.y/2))
+                pos2 = (int(r.bottomright.x/2 + r.bottomleft.x/2), int(r.bottomright.y/2 + r.topleft.y/2))
                 draw.line([pos1, pos2], (200, 0, 0), width=1)
                 
                 direction = (pos1[0] + int((pos2[0]-pos1[0])/5), pos1[1] + int((pos2[1]-pos1[1])/5))
@@ -242,10 +242,10 @@ class Navmesh(object):
         print("---EXPORTING NAVMESH---")
         data = struct.pack("<H", len(self.mesh))
         for rect in self.mesh:
-            data += struct.pack("<II", rect.topleft.get_coord()[0], rect.topleft.get_coord()[1])
-            data += struct.pack("<II", rect.bottomleft.get_coord()[0], rect.bottomleft.get_coord()[1])
-            data += struct.pack("<II", rect.topright.get_coord()[0], rect.topright.get_coord()[1])
-            data += struct.pack("<II", rect.bottomright.get_coord()[0], rect.bottomright.get_coord()[1])
+            data += struct.pack("<II", rect.topleft.x, rect.topleft.y)
+            data += struct.pack("<II", rect.bottomleft.x, rect.bottomleft.y)
+            data += struct.pack("<II", rect.topright.x, rect.topright.y)
+            data += struct.pack("<II", rect.bottomright.x, rect.bottomright.y)
         
         for rect in self.mesh:
             data += struct.pack("<B", len(rect.connections))
@@ -282,14 +282,14 @@ class Navmesh(object):
             data = data[8:]
             
             self.mesh.append(p)
-        
-        '''for rect in self.mesh:
+
+        for rect in self.mesh:
             # Connections
             n_connections = struct.unpack_from("<I", data)[0]
-            data = data[1:]
+            data = data[4:]
             for j in range(n_connections):
                 rect.connections.append(self.mesh[struct.unpack_from("<I", data)[0]])
-                data = data[2:]'''
+                data = data[4:]
 
         
 
@@ -308,7 +308,7 @@ class Simulation(object):
         self.fps_acceleration = 1
     
     def simulate(self, rect):
-        if rect.bottomleft.get_coord()[1] != rect.bottomright.get_coord()[1]:
+        if rect.bottomleft.y != rect.bottomright.y:
             # TODO: Stairs
             return
         
@@ -318,11 +318,11 @@ class Simulation(object):
             else:
                 start_x, tmp_y = rect.bottomleft.get_coord()
                 start_x -= self.char_width
-            
+            print("Char {0}".format(start_x))
             # Do this first for the left side, then for the right side
-            for start_y, start_vs in [(tmp_y, 0), (tmp_y, -8*self.fps_acceleration), (tmp_y - (rect.bottomleft.get_coord()[1] - rect.topleft.get_coord()[1]), 0)]:
+            for start_y, start_vs in [(tmp_y, 0), (tmp_y, -8*self.fps_acceleration), (tmp_y - (rect.bottomleft.y - rect.topleft.y), 0)]:
                 # Do this walking off the platform, jumping off, and being at the apex of a jump
-                for input_dir in [-1, 1]:
+                for input_dir in [-1, 0, 1]:
                     # Try all two input extremes
                     self.char_x = start_x+direction
                     self.char_y = start_y
@@ -331,6 +331,7 @@ class Simulation(object):
                     if self.collides_with_wallmask():
                         # If there's a wall in our path, we can already give up
                         break
+                    print("\nNew loop: input={0}, x={1}, hs={2}".format(input_dir, self.char_x, self.char_hs))
                     while True:
                         break_out = False
                         # Apply gravity
@@ -379,13 +380,13 @@ class Simulation(object):
                 
     def collides_with_navmesh(self):
         for rect in self.navmesh.mesh:
-            if rect.bottomleft.get_coord()[0] > self.char_x + self.char_width:
+            if rect.bottomleft.x > self.char_x + self.char_width:
                 continue
-            if rect.bottomright.get_coord()[0] < self.char_x:
+            if rect.bottomright.x < self.char_x:
                 continue
-            factor = (self.char_x - rect.bottomleft.get_coord()[0]) / (rect.bottomright.get_coord()[0] - rect.bottomleft.get_coord()[0])
-            y_top = rect.topleft.get_coord()[1] + factor*(rect.topright.get_coord()[1] - rect.topleft.get_coord()[1])
-            y_bottom = rect.bottomleft.get_coord()[1] + factor*(rect.bottomright.get_coord()[1] - rect.bottomleft.get_coord()[1])
+            factor = (self.char_x - rect.bottomleft.x) / (rect.bottomright.x - rect.bottomleft.x)
+            y_top = rect.topleft.y + factor*(rect.topright.y - rect.topleft.y)
+            y_bottom = rect.bottomleft.y + factor*(rect.bottomright.y - rect.bottomleft.y)
             if self.char_y <= y_top or self.char_y - self.char_height >= y_bottom:
                 continue
             return rect

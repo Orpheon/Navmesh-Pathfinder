@@ -1,7 +1,7 @@
 #include "main.h"
-#include "load_map.c"
-#include "generate_navmesh.c"
-#include "export_navmesh.c"
+#include "load_map.h"
+#include "generate_navmesh.h"
+#include "export_navmesh.h"
 #include <stdio.h>
 
 int main()
