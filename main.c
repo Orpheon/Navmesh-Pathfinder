@@ -7,28 +7,6 @@
 int main()
 {
     Bitmask *map = load_from_file("Maps/ctf_dirtbowl_v2.png");
-//    char str[map->width * (map->height+1)];
-//    int k=0;
-//
-//    for (int j=0; j<map->height; j++)
-//    {
-//        for (int i=0; i<map->width; i++)
-//        {
-//            if (map->mask[i][j])
-//            {
-//                str[k++] = '$';
-//            }
-//            else
-//            {
-//                str[k++] = ' ';
-//            }
-//        }
-//        str[k++] = '\n';
-//    }
-//
-//    FILE *f;
-//    f = fopen("output_map", "w");
-//    fprintf(f, str);
     printf("\nSize: %i, %i", map->width, map->height);
     int width = 18, height = 35;
     double speed = 2.0;

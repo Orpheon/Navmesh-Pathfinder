@@ -63,7 +63,7 @@ RectLinkedList *find_path(Navmesh *mesh, Rect *start, Rect *target)
     return path;
 }
 
-Rect *find_best_rect(Navmesh *mesh, Rect *target)
+Rect* find_best_rect(Navmesh *mesh, Rect *target)
 {
     RectLinkedList *list_iterator;
     Rect *rect, *best_rect=0;
