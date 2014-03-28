@@ -22,3 +22,7 @@
 
 # Navmesh files
 *.navmesh
+
+# Editor temp files
+*.layout
+*.depend
