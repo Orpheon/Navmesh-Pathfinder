@@ -39,7 +39,7 @@ char* get_commands(Navmesh *mesh, Character *character, Rect *current_rect, Rect
             // Get the equation of the parabola of walking off the edge (in the form y = ax^2 + bx + c)
             double a, b, c;
             a = GRAVITY/2;
-            b = sqrt(character->hs*character->hs + character->vs*character->vs) - 2*a*character->x;
+            b = sqrt(character->hs*character->hs + character->vs*character->vs) - 2*a*current_rect->bottomright.x;
             c = current_rect->bottomright.y - a*current_rect->bottomright.x*current_rect->bottomright.x - b*current_rect->bottomright.x;
 
             double landing_x, determinant;
@@ -59,7 +59,7 @@ char* get_commands(Navmesh *mesh, Character *character, Rect *current_rect, Rect
                 }
 
                 // Would we be going too far?
-                if (landing_x < next_rect->bottomleft.x)
+                if (landing_x > next_rect->bottomright.x)
                 {
                     // Should we already be braking now?
                     c = character->y - a*character->x*character->x - b*character->x;
@@ -68,7 +68,7 @@ char* get_commands(Navmesh *mesh, Character *character, Rect *current_rect, Rect
                     {
                         // Check whether walking off from our -current- position would already be enough to overshoot
                         landing_x = (-b + sqrt(determinant))/(2*a);
-                        if (landing_x < next_rect->bottomleft.x)
+                        if (landing_x > next_rect->bottomright.x)
                         {
                             // It's high time we brake
                             output[DIRECTION] = DIR_LEFT;
