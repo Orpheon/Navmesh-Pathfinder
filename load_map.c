@@ -18,7 +18,8 @@ Bitmask* load_from_file(char *filename)
     FILE *file = fopen(filename, "rb");
     if (!file)
     {
-        printf("Error: Could not find a map with that name!");
+        printf("\nError: Could not find a map with that name!\n");
+        fflush(stdout);
     }
 
     // read the image into RAM
@@ -45,7 +46,8 @@ Bitmask* load_from_file(char *filename)
 
     if(gg2_text_index == -1)
     {
-        printf("Error: No wallmask data found in map!");
+        printf("\nError: No wallmask data found in map!\n");
+        fflush(stdout);
     }
 
     // Copy the data string to memory we can actually use
