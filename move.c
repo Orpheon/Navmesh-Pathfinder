@@ -7,20 +7,75 @@
 
 #define OUTPUT_LENGTH 2
 #define DIRECTION 0
+#define STANDSTILL 0
 #define DIR_LEFT -1
 #define DIR_RIGHT 1
 #define JUMP 1
 
 char* get_commands(Navmesh *mesh, Character *character, Rect *current_rect, Rect *next_rect)
 {
-    // This needs some serious thought as to best way to implement this. In principle every step is easy, but checking without replicating too much isn't.
-
     char[OUTPUT_LENGTH] output;
+
+    // If we're not inside our current/last rectangle, then we are in the air flying towards our destination, so we should just continue to do that
+    if (character->x < current_rect->bottomleft.x || character->x > current_rect->bottomright.x || character->y < current_rect->topleft.y || character->y > current_rect->bottomleft.y)
+    {
+        // Get the equation of the parabola of our current falling (in the form y = ax^2 + bx + c)
+        double a, b, c;
+        a = GRAVITY/2;
+        b = sqrt(character->hs*character->hs + character->vs*character->vs) - 2*a*character->x;
+        c = character->y - a*character->x*character->x - b*character->x;
+
+        // Test whether we'll land within the right boundaries with the current path
+        double landing_x;
+        // The determinant should always be positive since we will always be above the target (and gravity always points down)
+        landing_x = (-b + sqrt(b*b - 4*a*(c-next_rect->bottomleft.y)))/(2*a);
+        if (landing_x < next_rect->bottomleft.x)
+        {
+            // We're overshooting on the left side
+            output[DIRECTION] = DIR_LEFT;
+        }
+        else if (landing_x > next_rect->bottomright.x)
+        {
+            // We're overshooting on the right side
+            output[DIRECTION] = DIR_RIGHT;
+        }
+        else
+        {
+            // We're good, but we might get to where-ever faster if we continued moving in the direction we were going until now
+            if (character->hs < 0)
+            {
+                output[DIRECTION] = DIR_LEFT;
+            }
+            else if (character->hs > 0)
+            {
+                output[DIRECTION] = DIR_RIGHT;
+            }
+            else
+            {
+                output[DIRECTION] = STANDSTILL;
+            }
+        }
+
+        // It does not make any sense for us to jump right now, assuming no doublejump
+        output[JUMP] = 0;
+        return output;
+    }
 
     // Target rect is underneath us
     if (sign(current_rect->bottomright.x - next_rect->bottomright.x) != sign(current_rect->bottomleft.x - next_rect->bottomleft.x))
     {
-        // TODO
+        // We need to find what side to walk/jump off of
+        if (abs(current_rect->bottomleft.x - next_rect->bottomleft.x) < abs(current_rect->bottomright.x - next_rect->bottomright.x))
+        {
+            output[DIRECTION] = DIR_LEFT;
+        }
+        else
+        {
+            output[DIRECTION] = DIR_RIGHT;
+        }
+        // There is no occasion where we'd want to jump, so don't do it
+        output[JUMP] = 0;
+        return output;
     }
     // Target rect is on our right
     else if (current_rect->bottomright.x < next_rect->bottomleft.x)
