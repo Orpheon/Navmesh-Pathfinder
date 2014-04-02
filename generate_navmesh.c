@@ -245,11 +245,11 @@ Navmesh* generate_navmesh(Bitmask *map, int char_width, int char_height, double 
     }
 
     printf("\n---SIMULATING PLAYER MOVEMENT---\n");
+    fflush(stdout);
     int counter = 0;
     list_iterator = mesh->list;
     while (list_iterator != 0)
     {
-        fflush(stdout);
         rect = list_iterator->rect;
         test_rectangle(mesh, rect, map, char_width, char_height, char_speed);
         list_iterator = list_iterator->next;

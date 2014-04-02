@@ -19,45 +19,74 @@ void test_rectangle(Navmesh *mesh, Rect *rect, Bitmask *map, int char_width, int
     character->height = char_height;
     character->speed = char_speed;
 
-    if (rect->bottomleft.y != rect->bottomright.y)
-    {
-        // TODO: Stairs
-        return;
-    }
+    // DEBUGTOOL
+    int debug_flag = 0;
+//    if (rect->bottomleft.x == 3078 && rect->bottomleft.y == 539)
+//    {
+//        debug_flag = 1;
+//        printf("\n\nDebugging single rect:");
+//    }
 
     // Simulate going in either direction (+6 and -6)
     for (int direction = -6; direction < 7; direction += 12)
     {
-        if (direction == 6)
-        {
-            character->x = (double) rect->bottomright.x;
-            character->y = (double) rect->bottomright.y;
-        }
-        else
-        {
-            character->x = (double) rect->bottomleft.x - (double) character->width;
-            character->y = (double) rect->bottomleft.y;
-        }
-
-        // Try out all 3 edge cases on this side
+        // Try out all 3 different movement types (walking off, jumping off and flying off from the apex of a jump) on this side
         for (int counter=0; counter<3; counter++)
         {
-            // I know this form of code is horrible, but it's shortest
-            // Here's what should happen: When counter=0; y=rect_bottom and vs=0
-            // When counter=1; y=rect_bottom and vs=jumping speed
-            // When counter=2; y=rect_top and vs=0
-            character->vs = 0;
-            if (counter == 1)
-            {
-                character->vs = -8;
-            }
-            else if (counter == 2)
-            {
-                character->y -= (rect->bottomleft.y - rect->topleft.y);
-            }
-
             for (int input_direction = -1; input_direction < 2; input_direction++)
             {
+                // Reset the character at the correct position on the edge of the mask
+                if (direction == 6)
+                {
+                    character->x = (double) rect->bottomright.x;
+                    character->y = (double) rect->bottomright.y;
+                }
+                else
+                {
+                    character->x = (double) rect->bottomleft.x - (double) character->width;
+                    character->y = (double) rect->bottomleft.y;
+                }
+
+                if (debug_flag)
+                {
+                    printf("\n\nDirection: %i\nX: %f\nY: %f", direction, character->x, character->y);
+                }
+
+                switch (counter)
+                {
+                    case 0:
+                        character->vs = 0;
+                        if (debug_flag)
+                        {
+                            printf("\n\nWalking off:");
+                        }
+                        break;
+
+                    case 1:
+                        character->vs = -8;
+                        if (debug_flag)
+                        {
+                            printf("\n\nJumping off:");
+                        }
+                        break;
+
+                    case 2:
+                        character->vs = 0;
+                        character->y -= (rect->bottomleft.y - rect->topleft.y);
+                        if (debug_flag)
+                        {
+                            printf("\n\nJumping from:");
+                        }
+                        break;
+
+                    default:
+                        printf("\nERROR: Invalid counter value in simulation.c");
+                }
+
+                if (debug_flag)
+                {
+                    printf("\n\nInput: %i\nX: %f\nY: %f", input_direction, character->x, character->y);
+                }
                 // Try flying left and then right
                 character->x += direction;
                 character->hs = (double)input_direction * character->speed;
@@ -65,12 +94,21 @@ void test_rectangle(Navmesh *mesh, Rect *rect, Bitmask *map, int char_width, int
                 if (collides_with_wallmask(character, map))
                 {
                     // If we're already in a collision before moving, no sense trying to do anything
+                    if (debug_flag)
+                    {
+                        printf("\n\nCOLLISION BEFORE SIMULATION");
+                    }
                     break;
                 }
 
                 bool continue_loop = true;
                 while (continue_loop)
                 {
+                    if (debug_flag)
+                    {
+                        printf("\n\nX: %f\nY: %f\nHS: %f\nVS: %f", character->x, character->y, character->hs, character->vs);
+                    }
+
                     // Apply gravity
                     character->vs += GRAVITY;
                     character->vs = min(character->vs, 10);
