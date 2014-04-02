@@ -2,6 +2,7 @@
 #include "data_types.h"
 #include "navmesh.h"
 #include <math.h>
+#include <limits.h>
 
 #define INACTIVE 0
 #define ACTIVE 1
@@ -22,7 +23,7 @@ RectLinkedList *find_path(Navmesh *mesh, Rect *start, Rect *target)
             for (int i=0; i<rect->num_connections; i++)
             {
                 other_rect = rect->connections[i];
-                if (other_rect.activation == INACTIVE || rect->distance + distance(rect, other_rect))
+                if (other_rect->activation == INACTIVE || rect->distance + distance(rect, other_rect))
                 {
                     other_rect->distance = rect->distance + distance(rect, other_rect);
                     other_rect->history = copy_linked_list(rect->history);
@@ -67,17 +68,17 @@ Rect* find_best_rect(Navmesh *mesh, Rect *target)
 {
     RectLinkedList *list_iterator;
     Rect *rect, *best_rect=0;
-    int fitness = MAX_INT;
+    int fitness = INT_MAX;
 
     list_iterator = mesh->list;
     while (list_iterator != 0)
     {
         rect = list_iterator->rect;
-        if (rect.activation == ACTIVE)
+        if (rect->activation == ACTIVE)
         {
-            if (rect.distance + distance(rect, target) < fitness)
+            if (rect->distance + distance(rect, target) < fitness)
             {
-                fitness = rect.distance + distance(rect, target);
+                fitness = rect->distance + distance(rect, target);
                 best_rect = rect;
             }
         }

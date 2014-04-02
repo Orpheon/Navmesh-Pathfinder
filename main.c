@@ -1,7 +1,10 @@
 #include "main.h"
+#include "move.h"
+#include "find_path.h"
 #include "load_map.h"
 #include "generate_navmesh.h"
 #include "export_navmesh.h"
+#include "data_types.h"
 #include <stdio.h>
 
 int main()

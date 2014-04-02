@@ -1,6 +1,8 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
+int main();
+
 //#include <windows.h>
 //
 ///*  To use this exported function of dll, include this header
