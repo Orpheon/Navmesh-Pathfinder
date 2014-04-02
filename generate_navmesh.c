@@ -1,7 +1,9 @@
 #include "generate_navmesh.h"
 #include "data_types.h"
 #include "navmesh.h"
+#include "simulation.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #define JUMP_HEIGHT 70
 #define STAIR_HEIGHT 6
@@ -247,7 +249,6 @@ Navmesh* generate_navmesh(Bitmask *map, int char_width, int char_height, double 
     list_iterator = mesh->list;
     while (list_iterator != 0)
     {
-        printf("\n%i%s", (int)(counter++*100.0/mesh->num_rects), "%");
         fflush(stdout);
         rect = list_iterator->rect;
         test_rectangle(mesh, rect, map, char_width, char_height, char_speed);

@@ -2,6 +2,8 @@
 #include "data_types.h"
 
 #include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define GRAVITY 0.6
 
@@ -14,7 +16,7 @@
 
 char* get_commands(Navmesh *mesh, Character *character, Rect *current_rect, Rect *next_rect)
 {
-    char[OUTPUT_LENGTH] output;
+    char *output = calloc(sizeof(char), OUTPUT_LENGTH);
 
     // If we're not inside our current/last rectangle, then we are in the air flying towards our destination, so we should just continue to do that
     if (character->x < current_rect->bottomleft.x || character->x > current_rect->bottomright.x || character->y < current_rect->topleft.y || character->y > current_rect->bottomleft.y)
@@ -232,6 +234,15 @@ char* get_commands(Navmesh *mesh, Character *character, Rect *current_rect, Rect
             output[JUMP] = 0;
             return output;
         }
+    }
+    // Should never happen
+    else
+    {
+        printf("\n\nERROR: Control end in move.c - This requires investigation.");
+        fflush(stdout);
+        output[DIRECTION] = DIR_LEFT;
+        output[JUMP] = 1;
+        return output;
     }
 }
 

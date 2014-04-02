@@ -11,12 +11,12 @@
 RectLinkedList *find_path(Navmesh *mesh, Rect *start, Rect *target)
 {
     RectLinkedList *list_iterator, *path;
-    Rect *rect, *other_rect;
+    Rect *rect=0, *other_rect=0;
 
     start->distance = 0.0;
     while (true)
     {
-        Rect *rect = find_best_rect(mesh, target);
+        find_best_rect(rect, mesh, target);
         if (rect != 0)
         {
             add_to_linked_list(rect->history, rect);
@@ -26,7 +26,7 @@ RectLinkedList *find_path(Navmesh *mesh, Rect *start, Rect *target)
                 if (other_rect->activation == INACTIVE || rect->distance + distance(rect, other_rect))
                 {
                     other_rect->distance = rect->distance + distance(rect, other_rect);
-                    other_rect->history = copy_linked_list(rect->history);
+                    copy_linked_list(rect->history, other_rect->history);
                     other_rect->activation = ACTIVE;
                     if (target->activation != INACTIVE)
                     {
@@ -64,10 +64,10 @@ RectLinkedList *find_path(Navmesh *mesh, Rect *start, Rect *target)
     return path;
 }
 
-Rect* find_best_rect(Navmesh *mesh, Rect *target)
+void find_best_rect(Rect *best_rect, Navmesh *mesh, Rect *target)
 {
     RectLinkedList *list_iterator;
-    Rect *rect, *best_rect=0;
+    Rect *rect;
     int fitness = INT_MAX;
 
     list_iterator = mesh->list;

@@ -16,9 +16,11 @@ Rect* collides_with_navmesh(Character *character, Navmesh *mesh);
 
 bool is_connected(Rect *rect1, Rect *rect2);
 
+void add_to_linked_list(RectLinkedList *list, Rect *rect);
+
 void destroy_linked_list(RectLinkedList *start);
 
-RectLinkedList *copy_linked_list(RectLinkedList *start);
+RectLinkedList* copy_linked_list(RectLinkedList *start, RectLinkedList *output);
 
 double distance(Rect *r1, Rect *r2);
 

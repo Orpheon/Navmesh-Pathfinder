@@ -2,6 +2,7 @@
 #include "simulation.h"
 #include "data_types.h"
 #include "navmesh.h"
+#include <stdlib.h>
 
 // DEBUGTOOL
 #include <stdio.h>

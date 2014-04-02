@@ -10,7 +10,7 @@ INC =
 CFLAGS =  -Wall -std=c99
 RESINC = 
 LIBDIR = 
-LIB =  -lglfw -lGL -lGLU -lpthread -lXxf86vm -lm -lpng
+LIB = -lpng
 LDFLAGS =
 
 all: compile

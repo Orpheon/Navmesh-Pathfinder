@@ -18,7 +18,7 @@ class Navmesh(object):
         #self.mesh = []
         self.load_navmesh(self.wallmask.name+".navmesh")
         self.draw_navmesh()
-        print("---DONE---")
+        print("\n---DONE---")
 
     def generate_navmesh(self, char_width, char_height, char_speed):
         mask = self.wallmask.mask
@@ -209,7 +209,7 @@ class Navmesh(object):
         rect2.connections.append(rect1)
     
     def draw_navmesh(self):
-        print("---DRAWING FINISHED NAVMESH---")
+        print("\n---DRAWING FINISHED NAVMESH TO FILE---")
     
         im = Image.new("RGB", (self.wallmask.width, self.wallmask.height))
         
@@ -239,7 +239,7 @@ class Navmesh(object):
         im.save("output.png")
     
     def save_navmesh(self):
-        print("---EXPORTING NAVMESH---")
+        print("\n---EXPORTING NAVMESH---")
         data = struct.pack("<H", len(self.mesh))
         for rect in self.mesh:
             data += struct.pack("<II", rect.topleft.x, rect.topleft.y)
@@ -257,7 +257,7 @@ class Navmesh(object):
         f.close()
     
     def load_navmesh(self, fname):
-        print("---LOADING NAVMESH---")
+        print("\n---LOADING NAVMESH---")
         f = open(fname, "rb")
         data = f.read()
         size = struct.unpack_from("<I", data)[0]

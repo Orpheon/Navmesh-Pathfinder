@@ -1,18 +1,17 @@
 #include "export_navmesh.h"
 #include "data_types.h"
 #include <stdio.h>
+#include <string.h>
 
 void export_navmesh(Navmesh *mesh, char* name)
 {
     char filename[strlen(name)+strlen(".navmesh")];
     strcpy(filename, name);
     strcat(filename, ".navmesh");
-    printf(filename);
     FILE *f;
     f = fopen(filename, "w");
 
     fwrite((const void*) &(mesh->num_rects), sizeof(int), 1, f);
-    printf("\n%i", mesh->num_rects);
     RectLinkedList *l;
     Rect *r;
     l = mesh->list;
@@ -26,8 +25,6 @@ void export_navmesh(Navmesh *mesh, char* name)
         fwrite((const void*) &(r->bottomright.x), sizeof(int), 2, f);
         l = l->next;
     }
-
-    printf("\n\nFRESH START\n\n");
 
     l = mesh->list;
     int tmp;

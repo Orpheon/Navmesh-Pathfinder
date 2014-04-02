@@ -4,6 +4,6 @@
 #include "data_types.h"
 
 RectLinkedList* find_path(Navmesh *mesh, Rect *start, Rect *target);
-Rect* find_best_rect(Navmesh *mesh, Rect *target);
+void find_best_rect(Rect *best_rect, Navmesh *mesh, Rect *target);
 
 #endif // FIND_PATH_H_INCLUDED

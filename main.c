@@ -15,6 +15,7 @@ int main()
     double speed = 2.0;
     Navmesh *mesh = generate_navmesh(map, width, height, speed);
     export_navmesh(mesh, "ctf_dirtbowl_v2");
+    printf("\n");
 }
 /*
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)

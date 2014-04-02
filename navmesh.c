@@ -1,6 +1,9 @@
 #include <stdbool.h>
 #include "data_types.h"
 #include "navmesh.h"
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 // DEBUGTOOL
 #include <stdio.h>
 
@@ -138,36 +141,6 @@ bool is_connected(Rect *start, Rect *target)
     return false;
 }
 
-void destroy_linked_list(RectLinkedList *start)
-{
-    RectLinkedList *p1, *p2;
-    p1 = start;
-    while (p1 != 0)
-    {
-        p2 = p1->next;
-        free(p1);
-        p1 = p2;
-    }
-}
-
-void copy_linked_list(RectLinkedList *start)
-{
-    RectLinkedList *l = calloc(sizeof(RectLinkedList), 1);
-    RectLinkedList *tmp = start, *tmp2;
-
-    tmp2 = l;
-
-    while (tmp != 0)
-    {
-        l->rect = tmp->rect;
-        l->next = calloc(sizeof(RectLinkedList), 1);
-        tmp = tmp->next;
-        l = l->next;
-    }
-
-    return tmp2;
-}
-
 void add_to_linked_list(RectLinkedList *list, Rect *rect)
 {
     RectLinkedList *l = list, *new_linked_list;
@@ -180,14 +153,44 @@ void add_to_linked_list(RectLinkedList *list, Rect *rect)
     new_linked_list->rect = rect;
 }
 
+void destroy_linked_list(RectLinkedList *start)
+{
+    RectLinkedList *p1, *p2;
+    p1 = start;
+    while (p1 != 0)
+    {
+        p2 = p1->next;
+        free(p1);
+        p1 = p2;
+    }
+}
+
+RectLinkedList* copy_linked_list(RectLinkedList *start, RectLinkedList *output)
+{
+    RectLinkedList *l = calloc(sizeof(RectLinkedList), 1);
+    RectLinkedList *tmp = start;
+
+    output = l;
+
+    while (tmp != 0)
+    {
+        l->rect = tmp->rect;
+        l->next = calloc(sizeof(RectLinkedList), 1);
+        tmp = tmp->next;
+        l = l->next;
+    }
+
+    return output;
+}
+
 double distance(Rect *r1, Rect *r2)
 {
     Point a, b;
-    a.x = (r1.bottomleft.x + r1.bottomright.x)/2;
-    a.y = (r1.bottomleft.y + r1.topleft.y)/2;
+    a.x = (r1->bottomleft.x + r1->bottomright.x)/2;
+    a.y = (r1->bottomleft.y + r1->topleft.y)/2;
 
-    b.x = (r2.bottomleft.x + r2.bottomright.x)/2;
-    b.y = (r2.bottomleft.y + r2.topleft.y)/2;
+    b.x = (r2->bottomleft.x + r2->bottomright.x)/2;
+    b.y = (r2->bottomleft.y + r2->topleft.y)/2;
 
     return sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y));
 }
