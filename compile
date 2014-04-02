@@ -2,3 +2,4 @@
 clear && clear
 make
 ./bin/executable
+python navmesh.py
