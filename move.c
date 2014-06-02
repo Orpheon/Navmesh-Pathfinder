@@ -14,7 +14,7 @@
 #define DIR_RIGHT 1
 #define JUMP 1
 
-char* get_commands(Navmesh *mesh, Character *character, Rect *current_rect, Rect *next_rect)
+char* get_commands(Character *character, Rect *current_rect, Rect *next_rect)
 {
     char *output = calloc(sizeof(char), OUTPUT_LENGTH);
 
@@ -24,31 +24,39 @@ char* get_commands(Navmesh *mesh, Character *character, Rect *current_rect, Rect
         // Get the equation of the parabola of our current falling (in the form y = ax^2 + bx + c)
         double a, b, c;
         a = GRAVITY/2;
-        b = sqrt(character->hs*character->hs + character->vs*character->vs) - 2*a*character->x;
+        b = -sqrt(character->hs*character->hs + character->vs*character->vs) - 2*a*character->x;
         c = character->y - a*character->x*character->x - b*character->x;
 
         // Test whether we'll land within the right boundaries with the current path
         double landing_x;
-        // The determinant should always be positive since we will always be above the target (and gravity always points down)
-        landing_x = (-b + sqrt(b*b - 4*a*(c-next_rect->bottomleft.y)))/(2*a);
+        if (b*b - 4*a*(c-next_rect->bottomleft.y) > 0)
+        {
+            landing_x = (-b + sqrt(b*b - 4*a*(c-next_rect->bottomleft.y)))/(2*a);
+        }
+        else
+        {
+            // We're off track anyways, just continue walking and let things take care of themselves
+            landing_x = 0.5*(next_rect->bottomleft.x + next_rect->bottomright.x);
+        }
+
         if (landing_x < next_rect->bottomleft.x)
         {
             // We're overshooting on the left side
-            output[DIRECTION] = DIR_LEFT;
+            output[DIRECTION] = DIR_RIGHT;
         }
         else if (landing_x > next_rect->bottomright.x)
         {
             // We're overshooting on the right side
-            output[DIRECTION] = DIR_RIGHT;
+            output[DIRECTION] = DIR_LEFT;
         }
         else
         {
             // We're good, but we might get to where-ever faster if we continued moving in the direction we were going until now
-            if (character->hs < 0)
+            if (current_rect->bottomleft.x > next_rect->bottomleft.x)
             {
                 output[DIRECTION] = DIR_LEFT;
             }
-            else if (character->hs > 0)
+            else if (current_rect->bottomleft.x < next_rect->bottomleft.x)
             {
                 output[DIRECTION] = DIR_RIGHT;
             }
@@ -96,41 +104,44 @@ char* get_commands(Navmesh *mesh, Character *character, Rect *current_rect, Rect
             // Get the equation of the parabola of walking off the edge (in the form y = ax^2 + bx + c)
             double a, b, c;
             a = GRAVITY/2;
-            b = sqrt(character->hs*character->hs + character->vs*character->vs) - 2*a*current_rect->bottomright.x;
+            b = -sqrt(character->hs*character->hs + character->vs*character->vs) - 2*a*current_rect->bottomright.x;
             c = current_rect->bottomright.y - a*current_rect->bottomright.x*current_rect->bottomright.x - b*current_rect->bottomright.x;
 
             double landing_x, determinant;
             // First check whether "walking off" even makes sense (it doesn't if we need to go higher)
-            determinant = b*b - 4*a*(c-next_rect->bottomleft.y);
-            if (determinant >= 0)
+            if (next_rect->bottomleft.y > current_rect->bottomright.y)
             {
-                // A sqrt is always positive, and we want the larger one of the two solutions (the one on the right)
-                landing_x = (-b + sqrt(determinant))/(2*a);
-                if (landing_x >= next_rect->bottomleft.x && landing_x <= next_rect->bottomright.x)
+                determinant = b*b - 4*a*(c-next_rect->bottomleft.y);
+                if (determinant >= 0)
                 {
-                    // Just walking off at current speeds will grant us safe landing.
-                    // Do so.
-                    output[DIRECTION] = DIR_RIGHT;
-                    output[JUMP] = 0;
-                    return output;
-                }
-
-                // Would we be going too far?
-                if (landing_x > next_rect->bottomright.x)
-                {
-                    // Should we already be braking now?
-                    c = character->y - a*character->x*character->x - b*character->x;
-                    determinant = b*b - 4*a*(c-next_rect->bottomleft.y);
-                    if (determinant >= 0)
+                    // A sqrt is always positive, and we want the larger one of the two solutions (the one on the right)
+                    landing_x = (-b + sqrt(determinant))/(2*a);
+                    if ((landing_x >= next_rect->bottomleft.x && landing_x <= next_rect->bottomright.x) || !next_rect->is_platform)
                     {
-                        // Check whether walking off from our -current- position would already be enough to overshoot
-                        landing_x = (-b + sqrt(determinant))/(2*a);
-                        if (landing_x > next_rect->bottomright.x)
+                        // Just walking off at current speeds will grant us safe landing.
+                        // Do so.
+                        output[DIRECTION] = DIR_RIGHT;
+                        output[JUMP] = 0;
+                        return output;
+                    }
+
+                    // Would we be going too far?
+                    if (landing_x > next_rect->bottomright.x)
+                    {
+                        // Should we already be braking now?
+                        c = character->y - a*character->x*character->x - b*character->x;
+                        determinant = b*b - 4*a*(c-next_rect->bottomleft.y);
+                        if (determinant >= 0)
                         {
-                            // It's high time we brake
-                            output[DIRECTION] = DIR_LEFT;
-                            output[JUMP] = 0;
-                            return output;
+                            // Check whether walking off from our -current- position would already be enough to overshoot
+                            landing_x = (-b + sqrt(determinant))/(2*a);
+                            if (landing_x > next_rect->bottomright.x)
+                            {
+                                // It's high time we brake
+                                output[DIRECTION] = DIR_LEFT;
+                                output[JUMP] = 0;
+                                return output;
+                            }
                         }
                     }
                 }
@@ -138,8 +149,8 @@ char* get_commands(Navmesh *mesh, Character *character, Rect *current_rect, Rect
 
             // Would jumping help?
             // Calculate the jumping parabola from our current position
-            double v_y = character->vs - 8;
-            b = sqrt(character->hs*character->hs + v_y*v_y) - 2*a*character->x;
+            double v_y = fmin(character->vs - 8, 8);
+            b = -sqrt(character->hs*character->hs + v_y*v_y) - 2*a*character->x;
             c = character->y - a*character->x*character->x - b*character->x;
             // It is not possible for this sqrt to be invalid. If this were the case, the navmesh has to be broken
             landing_x = (-b + sqrt(b*b - 4*a*(c-next_rect->bottomleft.y)))/(2*a);
@@ -174,41 +185,44 @@ char* get_commands(Navmesh *mesh, Character *character, Rect *current_rect, Rect
             // Get the equation of the parabola of walking off the edge (in the form y = ax^2 + bx + c)
             double a, b, c;
             a = GRAVITY/2;
-            b = sqrt(character->hs*character->hs + character->vs*character->vs) - 2*a*current_rect->bottomleft.x;
+            b = -sqrt(character->hs*character->hs + character->vs*character->vs) - 2*a*current_rect->bottomleft.x;
             c = current_rect->bottomleft.y - a*current_rect->bottomleft.x*current_rect->bottomleft.x - b*current_rect->bottomleft.x;
 
             double landing_x, determinant;
             // First check whether "walking off" even makes sense (it doesn't if we need to go higher)
-            determinant = b*b - 4*a*(c-next_rect->bottomright.y);
-            if (determinant >= 0)
+            if (next_rect->bottomright.y > current_rect->bottomleft.y)
             {
-                // A sqrt is always positive, and we want the larger one of the two solutions (the one on the right)
-                landing_x = (-b + sqrt(determinant))/(2*a);
-                if (landing_x >= next_rect->bottomleft.x && landing_x <= next_rect->bottomright.x)
+                determinant = b*b - 4*a*(c-next_rect->bottomleft.y);
+                if (determinant >= 0)
                 {
-                    // Just walking off at current speeds will grant us safe landing.
-                    // Do so.
-                    output[DIRECTION] = DIR_LEFT;
-                    output[JUMP] = 0;
-                    return output;
-                }
-
-                // Would we be going too far?
-                if (landing_x < next_rect->bottomleft.x)
-                {
-                    // Should we already be braking now?
-                    c = character->y - a*character->x*character->x - b*character->x;
-                    determinant = b*b - 4*a*(c-next_rect->bottomleft.y);
-                    if (determinant >= 0)
+                    // A sqrt is always positive, and we want the smaller one of the two solutions (the one on the left)
+                    landing_x = (-b - sqrt(determinant))/(2*a);
+                    if ((landing_x >= next_rect->bottomleft.x && landing_x <= next_rect->bottomright.x) || !next_rect->is_platform)
                     {
-                        // Check whether walking off from our -current- position would already be enough to overshoot
-                        landing_x = (-b + sqrt(determinant))/(2*a);
-                        if (landing_x < next_rect->bottomleft.x)
+                        // Just walking off at current speeds will grant us safe landing.
+                        // Do so.
+                        output[DIRECTION] = DIR_LEFT;
+                        output[JUMP] = 0;
+                        return output;
+                    }
+
+                    // Would we be going too far?
+                    if (landing_x < next_rect->bottomleft.x)
+                    {
+                        // Should we already be braking now?
+                        c = character->y - a*character->x*character->x - b*character->x;
+                        determinant = b*b - 4*a*(c-next_rect->bottomleft.y);
+                        if (determinant >= 0)
                         {
-                            // It's high time we brake
-                            output[DIRECTION] = DIR_RIGHT;
-                            output[JUMP] = 0;
-                            return output;
+                            // Check whether walking off from our -current- position would already be enough to overshoot
+                            landing_x = (-b + sqrt(determinant))/(2*a);
+                            if (landing_x < next_rect->bottomleft.x)
+                            {
+                                // It's high time we brake
+                                output[DIRECTION] = DIR_RIGHT;
+                                output[JUMP] = 0;
+                                return output;
+                            }
                         }
                     }
                 }
@@ -217,7 +231,7 @@ char* get_commands(Navmesh *mesh, Character *character, Rect *current_rect, Rect
             // Would jumping help?
             // Calculate the jumping parabola from our current position
             double v_y = character->vs - 8;
-            b = sqrt(character->hs*character->hs + v_y*v_y) - 2*a*character->x;
+            b = -sqrt(character->hs*character->hs + v_y*v_y) - 2*a*character->x;
             c = character->y - a*character->x*character->x - b*character->x;
             // It is not possible for this sqrt to be invalid. If this were the case, the navmesh has to be broken
             landing_x = (-b + sqrt(b*b - 4*a*(c-next_rect->bottomleft.y)))/(2*a);

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="NavmeshPathfinder" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="main">
+				<Option output="bin\NavmeshPathfinder" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-Wall" />
+				</Compiler>
+			</Target>
+			<Target title="debug">
+				<Option output="bin_debug\NavmeshPathfinder" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj_debug" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-std=c99" />
+		</Compiler>
+		<Linker>
+			<Add library="png" />
+		</Linker>
+		<Unit filename="data_types.h">
+			<Option target="main" />
+		</Unit>
+		<Unit filename="export_navmesh.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="find_path.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="find_path.h">
+			<Option target="main" />
+		</Unit>
+		<Unit filename="generate_navmesh.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="generate_navmesh.h">
+			<Option target="main" />
+		</Unit>
+		<Unit filename="load_map.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="load_map.h">
+			<Option target="main" />
+		</Unit>
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="main.cpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="main.h">
+			<Option target="main" />
+		</Unit>
+		<Unit filename="move.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="move.h">
+			<Option target="main" />
+		</Unit>
+		<Unit filename="navmesh.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="navmesh.h">
+			<Option target="main" />
+		</Unit>
+		<Unit filename="simulation.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="simulation.h">
+			<Option target="main" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

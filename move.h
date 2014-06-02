@@ -3,7 +3,7 @@
 
 #include "data_types.h"
 
-char* get_commands(Navmesh *mesh, Character *character, Rect *current_rect, Rect *next_rect);
+char* get_commands(Character *character, Rect *current_rect, Rect *next_rect);
 int sign(int x);
 
 #endif // MOVE_H_INCLUDED

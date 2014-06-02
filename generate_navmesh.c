@@ -20,10 +20,10 @@ Navmesh* generate_navmesh(Bitmask *map, int char_width, int char_height, double 
 
     // Generate all the areas, including unnecessary ones
     int x, y, i, j, max_height;
-    for (y=0; y<map->height-1; y++)
+    for (y=0; y<map->height-6; y++)
     {
         x = 0;
-        while (x < map->width-1)
+        while (x < map->width-6)
         {
             if ((!map->mask[x][y]) && map->mask[x][y+1])
             {
@@ -115,13 +115,13 @@ Navmesh* generate_navmesh(Bitmask *map, int char_width, int char_height, double 
         rect = list_iterator->rect;
         rect->topleft.y += char_height;
         rect->topright.y += char_height;
+        list_iterator = list_iterator->next;
         if (rect->topleft.y >= rect->bottomleft.y)
         {
             // This rect was too low for a character to fit through.
             // Destroy the rect
             remove_from_navmesh(mesh, rect);
         }
-        list_iterator = list_iterator->next;
     }
 
 //    // Stair optimisations
@@ -241,12 +241,16 @@ Navmesh* generate_navmesh(Bitmask *map, int char_width, int char_height, double 
             }
             other_list_iterator = other_list_iterator->next;
         }
+        if (rect->num_connections == 0)
+        {
+            // This rect has no immediate neighbours, which means that jumping should be handled carefully
+            rect->is_platform = 1;
+        }
         list_iterator = list_iterator->next;
     }
 
     printf("\n---SIMULATING PLAYER MOVEMENT---\n");
     fflush(stdout);
-    int counter = 0;
     list_iterator = mesh->list;
     while (list_iterator != 0)
     {

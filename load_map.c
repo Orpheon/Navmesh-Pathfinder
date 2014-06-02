@@ -20,6 +20,7 @@ Bitmask* load_from_file(char *filename)
     {
         printf("\nError: Could not find a map with that name!\n");
         fflush(stdout);
+        return (Bitmask*) -1;
     }
 
     // read the image into RAM
@@ -48,6 +49,7 @@ Bitmask* load_from_file(char *filename)
     {
         printf("\nError: No wallmask data found in map!\n");
         fflush(stdout);
+        return (Bitmask*) -2;
     }
 
     // Copy the data string to memory we can actually use

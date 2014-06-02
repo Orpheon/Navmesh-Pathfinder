@@ -29,6 +29,7 @@ struct Rect
     Point topright;
     Point bottomleft;
     Point bottomright;
+    bool is_platform;
     Rect **connections;
     int num_connections;
     // Pathfinding stuff

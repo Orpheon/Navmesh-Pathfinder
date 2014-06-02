@@ -3,8 +3,8 @@ import Image
 
 class Wallmask(object):
     def __init__(self):
-        self.load_wallmask("Maps/ctf_dirtbowl_v2.png")
-        self.name = "ctf_dirtbowl_v2"
+        self.load_wallmask("Maps/ctf_paramental.png")
+        self.name = "ctf_paramental"
         
     def load_wallmask(self, name):
         print("---LOADING WALLMASK---")

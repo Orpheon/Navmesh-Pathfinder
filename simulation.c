@@ -21,10 +21,13 @@ void test_rectangle(Navmesh *mesh, Rect *rect, Bitmask *map, int char_width, int
 
     // DEBUGTOOL
     int debug_flag = 0;
-//    if (rect->bottomleft.x == 3078 && rect->bottomleft.y == 539)
+//    if (point_inside_rect(mesh, 4161, 548) == rect)
 //    {
+//        printf("\n\n\nDebug Rect coming up");
+//        printf("\nTopleft: %i %i", rect->topleft.x, rect->topleft.y);
+//        printf("\nBottomright: %i %i", rect->bottomright.x, rect->bottomright.y);
 //        debug_flag = 1;
-//        printf("\n\nDebugging single rect:");
+//        fflush(stdout);
 //    }
 
     // Simulate going in either direction (+6 and -6)
@@ -88,7 +91,7 @@ void test_rectangle(Navmesh *mesh, Rect *rect, Bitmask *map, int char_width, int
                     printf("\n\nInput: %i\nX: %f\nY: %f", input_direction, character->x, character->y);
                 }
                 // Try flying left and then right
-                character->x += direction;
+//                character->x += direction;
                 character->hs = (double)input_direction * character->speed;
 
                 if (collides_with_wallmask(character, map))
@@ -124,17 +127,21 @@ void test_rectangle(Navmesh *mesh, Rect *rect, Bitmask *map, int char_width, int
                         Rect *new_rect = collides_with_navmesh(character, mesh);
                         if (new_rect != 0)
                         {
-                            // We've landed somewhere, find out whether we are already connected
-                            if (new_rect != rect)
+                            // Check whether we've landed or are flying up
+                            if (character->vs > 0)
                             {
-                                if (!is_connected(rect, new_rect))
+                                // Are we already connected?
+                                if (new_rect != rect)
                                 {
-                                    connect_rect(rect, new_rect);
+                                    if (!is_connected(rect, new_rect))
+                                    {
+                                        connect_rect(rect, new_rect);
+                                    }
                                 }
+                                // If yes, just continue
+                                continue_loop = false;
+                                break;
                             }
-                            // Next direction
-                            continue_loop = false;
-                            break;
                         }
 
                         // Respond to collisions with wallmask
@@ -160,6 +167,7 @@ void test_rectangle(Navmesh *mesh, Rect *rect, Bitmask *map, int char_width, int
                 }
             }
         }
+        debug_flag = 0;
     }
 }
 

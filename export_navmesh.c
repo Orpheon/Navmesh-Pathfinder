@@ -9,7 +9,7 @@ void export_navmesh(Navmesh *mesh, char* name)
     strcpy(filename, name);
     strcat(filename, ".navmesh");
     FILE *f;
-    f = fopen(filename, "w");
+    f = fopen(filename, "wb");
 
     fwrite((const void*) &(mesh->num_rects), sizeof(int), 1, f);
     RectLinkedList *l;
@@ -18,11 +18,15 @@ void export_navmesh(Navmesh *mesh, char* name)
     for (int i=0; i<mesh->num_rects; i++)
     {
         r = l->rect;
-        // This copies both the x and the y value
-        fwrite((const void*) &(r->topleft.x), sizeof(int), 2, f);
-        fwrite((const void*) &(r->bottomleft.x), sizeof(int), 2, f);
-        fwrite((const void*) &(r->topright.x), sizeof(int), 2, f);
-        fwrite((const void*) &(r->bottomright.x), sizeof(int), 2, f);
+        // Write everything to file
+        fwrite((const void*) &(r->topleft.x), sizeof(int), 1, f);
+        fwrite((const void*) &(r->topleft.y), sizeof(int), 1, f);
+        fwrite((const void*) &(r->bottomleft.x), sizeof(int), 1, f);
+        fwrite((const void*) &(r->bottomleft.y), sizeof(int), 1, f);
+        fwrite((const void*) &(r->topright.x), sizeof(int), 1, f);
+        fwrite((const void*) &(r->topright.y), sizeof(int), 1, f);
+        fwrite((const void*) &(r->bottomright.x), sizeof(int), 1, f);
+        fwrite((const void*) &(r->bottomright.y), sizeof(int), 1, f);
         l = l->next;
     }
 

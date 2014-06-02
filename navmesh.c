@@ -141,23 +141,58 @@ bool is_connected(Rect *start, Rect *target)
     return false;
 }
 
-void add_to_linked_list(RectLinkedList *list, Rect *rect)
+Rect* point_inside_rect(Navmesh *mesh, int x, int y)
 {
-    RectLinkedList *l = list, *new_linked_list;
-    while (l->next != 0)
+    // If the point is inside a Rect, we return the address of the Rect. Else, we return 0.
+    RectLinkedList *list_iterator = mesh->list;
+    Rect *rect;
+
+    while (list_iterator != 0)
     {
-        l = l->next;
+        rect = list_iterator->rect;
+        if (x >= rect->bottomleft.x && x <= rect->bottomright.x)
+        {
+            if (y >= rect->topleft.y && y <= rect->bottomleft.y)
+            {
+                // P(x|y) is inside the rect
+                return rect;
+            }
+        }
+
+        list_iterator = list_iterator->next;
     }
-    new_linked_list = calloc(sizeof(RectLinkedList), 1);
-    l->next = new_linked_list;
-    new_linked_list->rect = rect;
+
+    // We have found nothing, or we would have jumped out earlier
+    return (Rect*) 0;
 }
 
-void destroy_linked_list(RectLinkedList *start)
+RectLinkedList* add_to_linked_list(RectLinkedList *list, Rect *rect)
+{
+    RectLinkedList *l = list, *new_linked_list;
+    if (l == 0)
+    {
+        l = calloc(sizeof(RectLinkedList), 1);
+        l->rect = rect;
+        return l;
+    }
+    else
+    {
+        while (l->next != 0)
+        {
+            l = l->next;
+        }
+        new_linked_list = calloc(sizeof(RectLinkedList), 1);
+        l->next = new_linked_list;
+        new_linked_list->rect = rect;
+        return list;
+    }
+}
+
+void destroy_linked_list(RectLinkedList *start, RectLinkedList *limit)
 {
     RectLinkedList *p1, *p2;
     p1 = start;
-    while (p1 != 0)
+    while (p1 != limit)
     {
         p2 = p1->next;
         free(p1);
@@ -165,19 +200,45 @@ void destroy_linked_list(RectLinkedList *start)
     }
 }
 
-RectLinkedList* copy_linked_list(RectLinkedList *start, RectLinkedList *output)
+void destroy_navmesh(Navmesh *mesh)
 {
-    RectLinkedList *l = calloc(sizeof(RectLinkedList), 1);
+    RectLinkedList *p1, *p2;
+    p1 = mesh->list;
+    while (p1 != 0)
+    {
+        free(p1->rect->connections);
+        destroy_linked_list(p1->rect->history, 0);
+        p2 = p1->next;
+        free(p1);
+        p1 = p2;
+    }
+}
+
+RectLinkedList* copy_linked_list(RectLinkedList *start)
+{
     RectLinkedList *tmp = start;
 
-    output = l;
+    if (tmp == 0)
+    {
+        return 0;
+    }
 
-    while (tmp != 0)
+    RectLinkedList *l = calloc(sizeof(RectLinkedList), 1);
+    RectLinkedList *output = l;
+
+    while (true)
     {
         l->rect = tmp->rect;
-        l->next = calloc(sizeof(RectLinkedList), 1);
-        tmp = tmp->next;
-        l = l->next;
+        if (tmp->next != 0)
+        {
+            l->next = calloc(sizeof(RectLinkedList), 1);
+            l = l->next;
+            tmp = tmp->next;
+        }
+        else
+        {
+            break;
+        }
     }
 
     return output;

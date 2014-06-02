@@ -1,0 +1,10 @@
+EXPORTS
+    clear_navmesh @1
+    free_path @2
+    get_input @3
+    get_next_rect_x @4
+    get_next_rect_y @5
+    initialize_mesh @6
+    plan_path @7
+    return_last_error @8
+    update_position @9
