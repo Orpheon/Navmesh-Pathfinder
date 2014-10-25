@@ -22,18 +22,18 @@ void test_rectangle(Navmesh *mesh, Rect *rect, Bitmask *map, int char_width, int
 
     // DEBUGTOOL
     int debug_flag = 0;
-//    if (point_inside_rect(mesh, 1850, 630) == rect)
-//    {
-//        printf("\n\n\nDebug Rect coming up");
-//        printf("\nTopleft: %i %i", rect->topleft.x, rect->topleft.y);
-//        printf("\nBottomright: %i %i", rect->bottomright.x, rect->bottomright.y);
-//        debug_flag = 1;
-//        fflush(stdout);
-//    }
-//    else if (debug_flag)
-//    {
-//        debug_flag = 0;
-//    }
+    if (point_inside_rect(mesh, 3433, 220) == rect)
+    {
+        printf("\n\n\nDebug Rect coming up");
+        printf("\nTopleft: %i %i", rect->topleft.x, rect->topleft.y);
+        printf("\nBottomright: %i %i", rect->bottomright.x, rect->bottomright.y);
+        debug_flag = 1;
+        fflush(stdout);
+    }
+    else if (debug_flag)
+    {
+        debug_flag = 0;
+    }
 
     // Simulate going in either direction (+6 and -6)
     for (int direction = -6; direction < 7; direction += 12)
@@ -177,26 +177,16 @@ void test_rectangle(Navmesh *mesh, Rect *rect, Bitmask *map, int char_width, int
                             }
                         }
 
-//                        if (debug_flag && character->x >= 836.0 && character->y >= 1471.0)
-//                        {
-//                            printf("\nStill in simulation: %f %f", character->x, character->y);
-//                        }
-
                         // Respond to collisions with wallmask
                         // We can't collide vertically with anything as long as we check for areas first
                         int collision_counter = 0;
                         while (collides_with_wallmask(character, map))
                         {
-//                            if (debug_flag && character->x >= 836.0 && character->y >= 1471.0)
-//                            {
-//                                printf("\nCollision: %i %f %f", collision_counter, character->x+character->width, character->y);
-//                            }
-//                            if (debug_flag && direction == 6 && counter == 1)
-//                            {
-//                                printf("\n\nCollision\nX: %f\nY: %f\nHS: %f\nVS: %f\n", character->x+character->width, character->y, character->hs, character->vs);
-//                                printf("\nCollision\n %f\n %f\n %i\n %f", fabs(character->hs), fabs(character->vs), sign(character->hs), sign(character->hs)*(fabs(character->hs)+fabs(character->vs))/SIMULATION_GRANULARITY);
-//                                printf("\n%i", collides_with_wallmask(character, map));
-//                            }
+                            if (debug_flag && direction == -6 && counter == 2)
+                            {
+                                printf("\n\nCollision\nX: %f\nY: %f\nHS: %f\nVS: %f\n", character->x+character->width, character->y, character->hs, character->vs);
+                                printf("\n%i", collides_with_wallmask(character, map));
+                            }
                             // Abuse of triangle inequality, this is very hacky math
                             // Only adding character->hs runs the risk of /just/ not getting out
                             // Since the sum of both components is necessarily larger than the diagonal, it avoids this problem while still having a rather low bound
@@ -207,12 +197,21 @@ void test_rectangle(Navmesh *mesh, Rect *rect, Bitmask *map, int char_width, int
                                 // we got stuck somewhere, give up
                                 printf("\n\nCollision got stuck\nX: %f\nY: %f\nHS: %f\nVS: %f\n", character->x+character->width, character->y, character->hs, character->vs);
                                 printf("\n%i", collides_with_wallmask(character, map));
+                                printf("\nDirection: %i", direction);
+                                printf("\nCounter: %i", counter);
+                                printf("\nRect bottomleft: %i | %i", rect->bottomleft.x, rect->bottomleft.y);
+                                printf("\nRect bottomright: %i | %i", rect->bottomright.x, rect->bottomright.y);
+                                printf("\nRect topleft: %i | %i", rect->topleft.x, rect->topleft.y);
+                                printf("\nRect topright: %i | %i", rect->topright.x, rect->topright.y);
+                                printf("\nRect pointer: %d", rect);
+                                exit(1);
+
                                 continue_loop = false;
                                 break;
                             }
                         }
 
-                        if (debug_flag && direction == 6 && counter == 1)
+                        if (debug_flag)
                         {
                             printf("\n\nPost-Collision:\nX: %f\nY: %f\nHS: %f\nVS: %f", character->x+character->width, character->y, character->hs, character->vs);
                             printf("\nValues: %i, %i", collides_with_navmesh(character, mesh), collides_with_wallmask(character, map));
