@@ -231,10 +231,10 @@ class Navmesh(object):
             for r in rect.connections:
                 pos1 = (int(rect.bottomright.x/2 + rect.bottomleft.x/2), int(rect.bottomright.y/2 + rect.topleft.y/2))
                 pos2 = (int(r.bottomright.x/2 + r.bottomleft.x/2), int(r.bottomright.y/2 + r.topleft.y/2))
-                #draw.line([pos1, pos2], (200, 0, 0), width=1)
+                draw.line([pos1, pos2], (200, 0, 0), width=1)
                 
                 direction = (pos1[0] + int((pos2[0]-pos1[0])/5), pos1[1] + int((pos2[1]-pos1[1])/5))
-                #draw.line([pos1, direction], (0, 0, 200), width=3)
+                draw.line([pos1, direction], (0, 0, 200), width=3)
 
         im.save("output.png")
     

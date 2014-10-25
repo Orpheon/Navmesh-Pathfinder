@@ -18,6 +18,10 @@ char* get_commands(Character *character, Rect *current_rect, Rect *next_rect)
 {
     char *output = calloc(sizeof(char), OUTPUT_LENGTH);
 
+    double hs_left, hs_right;
+    hs_left = fmin(character->hs-6.0, -6.0);
+    hs_right = fmin(character->hs+6.0, 6.0);
+
     // If we're not inside our current/last rectangle, then we are in the air flying towards our destination, so we should just continue to do that
     if (character->x < current_rect->bottomleft.x || character->x > current_rect->bottomright.x || character->y < current_rect->topleft.y || character->y > current_rect->bottomleft.y)
     {
@@ -104,7 +108,7 @@ char* get_commands(Character *character, Rect *current_rect, Rect *next_rect)
             // Get the equation of the parabola of walking off the edge (in the form y = ax^2 + bx + c)
             double a, b, c;
             a = GRAVITY/2;
-            b = -sqrt(character->hs*character->hs + character->vs*character->vs) - 2*a*current_rect->bottomright.x;
+            b = -sqrt(hs_right*hs_right + character->vs*character->vs) - 2*a*current_rect->bottomright.x;
             c = current_rect->bottomright.y - a*current_rect->bottomright.x*current_rect->bottomright.x - b*current_rect->bottomright.x;
 
             double landing_x, determinant;
@@ -150,7 +154,7 @@ char* get_commands(Character *character, Rect *current_rect, Rect *next_rect)
             // Would jumping help?
             // Calculate the jumping parabola from our current position
             double v_y = fmin(character->vs - 8, 8);
-            b = -sqrt(character->hs*character->hs + v_y*v_y) - 2*a*character->x;
+            b = -sqrt(hs_right*hs_right + v_y*v_y) - 2*a*character->x;
             c = character->y - a*character->x*character->x - b*character->x;
             // It is not possible for this sqrt to be invalid. If this were the case, the navmesh has to be broken
             landing_x = (-b + sqrt(b*b - 4*a*(c-next_rect->bottomleft.y)))/(2*a);
@@ -185,7 +189,7 @@ char* get_commands(Character *character, Rect *current_rect, Rect *next_rect)
             // Get the equation of the parabola of walking off the edge (in the form y = ax^2 + bx + c)
             double a, b, c;
             a = GRAVITY/2;
-            b = -sqrt(character->hs*character->hs + character->vs*character->vs) - 2*a*current_rect->bottomleft.x;
+            b = -sqrt(hs_left*hs_left + character->vs*character->vs) - 2*a*current_rect->bottomleft.x;
             c = current_rect->bottomleft.y - a*current_rect->bottomleft.x*current_rect->bottomleft.x - b*current_rect->bottomleft.x;
 
             double landing_x, determinant;
@@ -219,7 +223,7 @@ char* get_commands(Character *character, Rect *current_rect, Rect *next_rect)
                             if (landing_x < next_rect->bottomleft.x)
                             {
                                 // It's high time we brake
-                                output[DIRECTION] = DIR_RIGHT;
+                                output[DIRECTION] = DIR_LEFT;
                                 output[JUMP] = 0;
                                 return output;
                             }
@@ -230,11 +234,11 @@ char* get_commands(Character *character, Rect *current_rect, Rect *next_rect)
 
             // Would jumping help?
             // Calculate the jumping parabola from our current position
-            double v_y = character->vs - 8;
-            b = -sqrt(character->hs*character->hs + v_y*v_y) - 2*a*character->x;
+            double v_y = fmin(character->vs - 8, 8);
+            b = sqrt(hs_left*hs_left + v_y*v_y) - 2*a*character->x;
             c = character->y - a*character->x*character->x - b*character->x;
             // It is not possible for this sqrt to be invalid. If this were the case, the navmesh has to be broken
-            landing_x = (-b + sqrt(b*b - 4*a*(c-next_rect->bottomleft.y)))/(2*a);
+            landing_x = (-b - sqrt(b*b - 4*a*(c-next_rect->bottomleft.y)))/(2*a);
             if (landing_x >= next_rect->bottomleft.x && landing_x <= next_rect->bottomright.x)
             {
                 // Jumping would work right now

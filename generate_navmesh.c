@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #define JUMP_HEIGHT 70
+#define GRAVITY 0.6
 #define STAIR_HEIGHT 6
 #define MAX_STAIR_WIDTH 11*6
 #define sign(x) ((x>0) - (x<0))
@@ -251,11 +252,15 @@ Navmesh* generate_navmesh(Bitmask *map, int char_width, int char_height, double 
 
     printf("\n---SIMULATING PLAYER MOVEMENT---\n");
     fflush(stdout);
+    double a, b;
+    a = -GRAVITY/2.0;
+    b = sqrt(char_speed*char_speed + 8.0*8.0);
+
     list_iterator = mesh->list;
     while (list_iterator != 0)
     {
         rect = list_iterator->rect;
-        test_rectangle(mesh, rect, map, char_width, char_height, char_speed);
+        test_rectangle(mesh, rect, map, char_width, char_height, char_speed, a, b);
         list_iterator = list_iterator->next;
     }
 

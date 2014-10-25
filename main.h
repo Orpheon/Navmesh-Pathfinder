@@ -3,8 +3,6 @@
 
 // DEBUGTOOL
 //int main();
-//double plan_path(double meshptr, double start_x, double start_y, double target_x, double target_y);
-//double update_position(double meshptr, double pathptr, double x, double y, double halfwidth);
 
 double ptr_to_gm(void *p);
 void* gm_to_ptr(double d);
