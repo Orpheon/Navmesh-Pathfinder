@@ -113,8 +113,7 @@ void test_rectangle(Navmesh *mesh, Rect *rect, Bitmask *map, int char_width, int
                 {
                     printf("\n\nInput: %i\nX: %f\nY: %f", input_direction, character->x, character->y);
                 }
-                // Try flying left and then right
-//                character->x += direction;
+                character->x += direction;
                 character->hs = (double)input_direction * character->speed;
 
                 if (collides_with_wallmask(character, map))
@@ -143,6 +142,18 @@ void test_rectangle(Navmesh *mesh, Rect *rect, Bitmask *map, int char_width, int
                     // Apply gravity
                     character->vs += GRAVITY;
                     character->vs = min(character->vs, 10);
+
+                    // Check whether we'll collide into the ceiling
+                    // If yes, lower vs so that it won't happen
+                    while (is_ceiling_above(character, map, -character->vs))
+                    {
+                        // Misusing GRAVITY as a quantum of vertical speed
+                        character->vs -= -GRAVITY;
+                        if (character->vs < 0)
+                        {
+                            character->vs = 0;
+                        }
+                    }
 
                     // Move carefully, while checking to collisions
                     // Don't want to do real collision handling
@@ -248,14 +259,31 @@ bool collides_with_wallmask(Character *character, Bitmask *map)
 }
 
 
-bool is_floor_underneath(Character *character, Bitmask *map, int depth)
+bool is_floor_underneath(Character *character, Bitmask *map, double depth)
 {
-    for (int h=0; h<depth; h++)
+    for (double h=0; h<depth; h++)
     {
         for (int w=0; w<character->width; w++)
         {
             // Check for every pixel in character, is there wallmask there?
-            if (map->mask[(int)character->x + w][(int)character->y - h])
+            if (map->mask[(int)character->x + w][(int)(character->y + h)])
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool is_ceiling_above(Character *character, Bitmask *map, double height)
+{
+    for (double h=0; h<height; h++)
+    {
+        for (int w=0; w<character->width; w++)
+        {
+            // Check for every pixel in character, is there wallmask there?
+            if (map->mask[(int)character->x + w][(int)(character->y - character->height - h)])
             {
                 return true;
             }
