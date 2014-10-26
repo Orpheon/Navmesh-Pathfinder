@@ -26,7 +26,7 @@ int last_error = 0;
 // Only problem might be arial obstacles, but we could deal with those with jumping up once we found a spot.
 
 
-//// DEBUGTOOL
+#ifdef DEBUG_MODE
 int main()
 {
     Bitmask *map = load_from_file("Maps/ctf_paramental.png");
@@ -45,6 +45,7 @@ int main()
     export_navmesh(mesh, "ctf_paramental");
     printf("\n");
 }
+#endif
 
 double ptr_to_gm(void *p) {
     double d;

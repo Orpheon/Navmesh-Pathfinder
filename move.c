@@ -256,8 +256,10 @@ char* get_commands(Character *character, Rect *current_rect, Rect *next_rect)
     // Should never happen
     else
     {
+#ifdef DEBUG_MODE
         printf("\n\nERROR: Control end in move.c - This requires investigation.");
         fflush(stdout);
+#endif
         output[DIRECTION] = DIR_LEFT;
         output[JUMP] = 1;
         return output;

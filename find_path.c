@@ -3,8 +3,10 @@
 #include "navmesh.h"
 #include <math.h>
 #include <limits.h>
-// DEBUGTOOL
-#include <stdio.h>
+
+#ifdef DEBUG_MODE
+    #include <stdio.h>
+#endif
 
 #define INACTIVE 0
 #define ACTIVE 1
@@ -15,22 +17,25 @@ RectLinkedList* find_path(Navmesh *mesh, Rect *start, Rect *target)
     RectLinkedList *list_iterator;
     Rect *rect=0, *other_rect=0;
 
-    // DEBUGTOOL
+#ifdef DEBUG_MODE
     int debug_flag = 0;
     if (debug_flag)
     {
         printf("\n\n\nBEGIN PATHFINDING DEBUG\n");
     }
+#endif
 
     start->distance = 0.0;
     start->activation = ACTIVE;
     while (true)
     {
         rect = find_best_rect(mesh, target);
+#ifdef DEBUG_MODE
         if (debug_flag)
         {
             printf("\n\nNew rect observed; next rect=%d", rect);
         }
+#endif
         if (rect != 0)
         {
             rect->history = add_to_linked_list(rect->history, rect);
@@ -39,14 +44,17 @@ RectLinkedList* find_path(Navmesh *mesh, Rect *start, Rect *target)
                 other_rect = rect->connections[i];
                 if (other_rect->activation == INACTIVE || rect->distance + distance(rect, other_rect) < other_rect->distance)
                 {
+#ifdef DEBUG_MODE
                     if (debug_flag && other_rect == target)
                     {
                         printf("\n\nTarget (%i|%i) got updated", other_rect->bottomleft.x, other_rect->bottomleft.y);
                     }
+#endif
                     // Overwrite everything
                     other_rect->distance = rect->distance + distance(rect, other_rect);
                     destroy_linked_list(other_rect->history, 0);
                     other_rect->history = copy_linked_list(rect->history);
+#ifdef DEBUG_MODE
                     if (debug_flag && other_rect == target)
                     {
                         RectLinkedList *l = other_rect->history;
@@ -57,7 +65,9 @@ RectLinkedList* find_path(Navmesh *mesh, Rect *start, Rect *target)
                             l = l->next;
                         }
                         printf("\nPath done\n");
+
                     }
+#endif
                     other_rect->activation = ACTIVE;
                     if (target->activation != INACTIVE)
                     {

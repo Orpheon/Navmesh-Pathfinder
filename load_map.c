@@ -18,8 +18,10 @@ Bitmask* load_from_file(char *filename)
     FILE *file = fopen(filename, "rb");
     if (!file)
     {
+#ifdef DEBUG_MODE
         printf("\nError: Could not find a map with that name!\n");
         fflush(stdout);
+#endif
         return (Bitmask*) -1;
     }
 
@@ -47,8 +49,10 @@ Bitmask* load_from_file(char *filename)
 
     if(gg2_text_index == -1)
     {
+#ifdef DEBUG_MODE
         printf("\nError: No wallmask data found in map!\n");
         fflush(stdout);
+#endif
         return (Bitmask*) -2;
     }
 

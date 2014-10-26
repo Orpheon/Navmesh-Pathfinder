@@ -1,8 +1,9 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-// DEBUGTOOL
-//int main();
+#ifdef DEBUG_MODE
+int main();
+#endif
 
 double ptr_to_gm(void *p);
 void* gm_to_ptr(double d);

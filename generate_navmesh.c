@@ -2,8 +2,12 @@
 #include "data_types.h"
 #include "navmesh.h"
 #include "simulation.h"
-#include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
+#ifdef DEBUG_MODE
+    #include <stdio.h>
+#endif
 
 #define JUMP_HEIGHT 70
 #define GRAVITY 0.6
@@ -17,7 +21,9 @@ Navmesh* generate_navmesh(Bitmask *map, int char_width, int char_height, double 
     Rect *rect;
     RectLinkedList *list_iterator;
 
+#ifdef DEBUG_MODE
     printf("\n---GENERATING AREAS---\n");
+#endif
 
     // Generate all the areas, including unnecessary ones
     int x, y, i, j, max_height;
@@ -196,7 +202,10 @@ Navmesh* generate_navmesh(Bitmask *map, int char_width, int char_height, double 
 //    }
 
     // Connect any areas that touch each other
+#ifdef DEBUG_MODE
     printf("\n---CONNECTING NEIGHBOURING AREAS---\n");
+    fflush(stdout);
+#endif
     list_iterator = mesh->list;
     RectLinkedList *other_list_iterator = mesh->list;
     Rect *other_rect;
@@ -250,8 +259,10 @@ Navmesh* generate_navmesh(Bitmask *map, int char_width, int char_height, double 
         list_iterator = list_iterator->next;
     }
 
+#ifdef DEBUG_MODE
     printf("\n---SIMULATING PLAYER MOVEMENT---\n");
     fflush(stdout);
+#endif
     double a, b;
     a = -GRAVITY/2.0;
     b = sqrt(char_speed*char_speed + 8.0*8.0);

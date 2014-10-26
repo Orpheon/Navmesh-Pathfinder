@@ -11,8 +11,6 @@ void add_to_navmesh(Navmesh* mesh, int bottomleft_x, int bottomleft_y, int width
 {
     Rect *r = (Rect*) calloc(1, sizeof(Rect));
 
-//    printf("\n\nPosition: (%i | %i), (%i | %i)", bottomleft_x, bottomleft_y, bottomleft_x+width, bottomleft_y+height);
-
     // Positions
     r->topleft.x = bottomleft_x;
     r->topleft.y = bottomleft_y-height;
