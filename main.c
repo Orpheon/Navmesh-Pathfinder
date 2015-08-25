@@ -35,14 +35,15 @@ int main()
     double speed = 4.0;
     Navmesh *mesh = generate_navmesh(map, width, height, speed);
     printf("\n\nNAVMESH GENERATED.");
-//    double path = plan_path(ptr_to_gm(mesh), 2930, 817, 3966, 444);
-//    printf("\nLast error 1: %i", last_error);
-//    path = update_position(ptr_to_gm(mesh), path, 2930, 817, 5);
-//    printf("\nPath pointer: %d", path);
-//    printf("\nLast error 2: %i", last_error);
-//    double input = get_input(path, 3012, 853, 0, 0);
-//    printf("\nInput: %f", input);
     export_navmesh(mesh, "ctf_paramental");
+    printf("\n\nNAVMESH PRINTED.\n");
+    double path = plan_path(ptr_to_gm(mesh), 2964, 876, 1164, 444);
+    printf("\nPlan path last error: %i", last_error);
+    path = update_position(ptr_to_gm(mesh), path, 2964, 876, 5);
+    printf("\nPath pointer: %d", path);
+    printf("\nUpdate position last error 2: %i", last_error);
+    double input = get_input(path, 2964, 876, 0, 0);
+    printf("\nInput: %f", input);
     printf("\n");
 }
 #endif
@@ -88,7 +89,6 @@ __declspec(dllexport) double clear_navmesh(double meshptr)
     return 0;
 }
 
-//double plan_path(double meshptr, double start_x, double start_y, double target_x, double target_y)
 __declspec(dllexport) double plan_path(double meshptr, double start_x, double start_y, double target_x, double target_y)
 {
     last_error = 0;
@@ -126,7 +126,6 @@ __declspec(dllexport) double get_next_rect_y(double pathptr)
     return 0.5*(path->next->rect->bottomleft.y + path->next->rect->bottomright.y);
 }
 
-//double update_position(double meshptr, double pathptr, double x, double y, double halfwidth)
 __declspec(dllexport) double update_position(double meshptr, double pathptr, double x, double y, double halfwidth)
 {
     Navmesh *mesh = (Navmesh*) gm_to_ptr(meshptr);
@@ -182,7 +181,6 @@ __declspec(dllexport) double update_position(double meshptr, double pathptr, dou
     return pathptr;
 }
 
-//double get_input(double pathptr, double x, double y, double hs, double vs)
 __declspec(dllexport) double get_input(double pathptr, double x, double y, double hs, double vs)
 {
     RectLinkedList *l = (RectLinkedList*) gm_to_ptr(pathptr);

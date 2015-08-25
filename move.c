@@ -22,6 +22,10 @@ char* get_commands(Character *character, Rect *current_rect, Rect *next_rect)
     hs_left = fmin(character->hs-6.0, -6.0);
     hs_right = fmin(character->hs+6.0, 6.0);
 
+#ifdef DEBUG_MODE
+    printf("\n\nINPUT GATHERING\n\n");
+#endif
+
     // If we're not inside our current/last rectangle, then we are in the air flying towards our destination, so we should just continue to do that
     if (character->x < current_rect->bottomleft.x || character->x > current_rect->bottomright.x || character->y < current_rect->topleft.y || character->y > current_rect->bottomleft.y)
     {
