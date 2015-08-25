@@ -3,6 +3,7 @@
 #include "data_types.h"
 #include "navmesh.h"
 #include <stdlib.h>
+#include <math.h>
 
 #ifdef DEBUG_MODE
     #include <stdio.h>
@@ -62,7 +63,6 @@ void test_rectangle(Navmesh *mesh, Rect *rect, Bitmask *map, int char_width, int
                     printf("\n\nDirection: %i\nX: %f\nY: %f", direction, character->x, character->y);
                 }
 #endif
-                double rect_width, speed;
                 switch (counter)
                 {
                     case 0:
@@ -164,8 +164,7 @@ void test_rectangle(Navmesh *mesh, Rect *rect, Bitmask *map, int char_width, int
                         Rect *new_rect = collides_with_navmesh(character, mesh);
                         if (new_rect != 0)
                         {
-                            // Check whether we're on the ground
-                            if (character->vs >= 0 && is_floor_underneath(character, map, character->vs))
+                            if ((character->vs >= 0 && is_floor_underneath(character, map, character->vs)) || new_rect->bottomleft.y < rect->bottomleft.y)
                             {
                                 // Are we already connected?
                                 if (new_rect != rect)
